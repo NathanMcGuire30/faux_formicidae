@@ -9,6 +9,7 @@ import random
 
 from world import AntWorld
 
+ANGLEOFCHANGE = 0.8
 
 class Ant(object):
     def __init__(self, world: AntWorld = None, x=0, y=0):
@@ -45,7 +46,7 @@ class Ant(object):
             return False
 
     def randomExplore(self, delta_t):
-        direction_adj = random.random() * 0.8
+        direction_adj = random.random() * ANGLEOFCHANGE
         direction = self.exploreDirection + direction_adj
 
         if not self.move(direction, self.antSpeed * delta_t):
