@@ -5,11 +5,13 @@ Class to represent the world
 """
 
 import numpy as np
+import cv2
 import pygame
 from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, FOODOBJECT, CellData
 
 NUM_PHEROMONES = 2
 PHEROMONE_INDEX = {HOMEPHEROMONE: 1, FOODPHEROMONE: 2}
+
 
 class AntWorld(object):
     def __init__(self, width_cm: int, height_cm: int, resolution: int):
@@ -66,6 +68,9 @@ class AntWorld(object):
         self.world[i, j, PHEROMONE_INDEX[pheromone]] = amnt
         return
 
+    def getLayer(self, layer_id: int):
+        return self.world[:, :, layer_id]
+
     def runOnce(self, delta_t):
         """
         Advance the simulation one timestep.  Since the world doesn't change yet, this function does nothing
@@ -75,11 +80,12 @@ class AntWorld(object):
         """
 
         pass
+
     def render(self, screen):
         
-        pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(400, 100, 100, 50))
-        pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 200, 200, 100))
-        pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 0, 200, 100))
+        # pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(400, 100, 100, 50))
+        # pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 200, 200, 100))
+        # pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 0, 200, 100))
         pygame.draw.rect(screen, pygame.Color('chartreuse4'), pygame.Rect(0, 0, 50, 50))
 
         for idx, cell in np.ndenumerate(self.world[:,:,0]):
@@ -95,3 +101,10 @@ class AntWorld(object):
                 pygame.draw.rect(screen, pygame.Color('green'), pygame.Rect(idx[0], idx[1], 1, 1))
         
 
+        obstacles = self.getLayer(0).astype(np.uint8).T
+        obstacles = (1 - obstacles) * 255
+
+        obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
+
+        pygame_img = pygame.image.frombuffer(obstacles_img.tostring(), obstacles_img.shape[1::-1], "BGR")
+        screen.blit(pygame_img, (0, 0))

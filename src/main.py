@@ -14,8 +14,8 @@ RESOLUTION = 40
 
 COLONY_START_SIZE = 100
 
+
 def main():
-    
     world = AntWorld(WIDTHSCALE, HEIGHTSCALE, RESOLUTION)
 
     sim = Simulation(world)
@@ -26,7 +26,7 @@ def main():
 
     # pygame setup
     pygame.init()
-    screen = pygame.display.set_mode((WIDTHSCALE*RESOLUTION, HEIGHTSCALE*RESOLUTION))
+    screen = pygame.display.set_mode((WIDTHSCALE * RESOLUTION, HEIGHTSCALE * RESOLUTION))
     clock = pygame.time.Clock()
     running = True
     dt = 0
@@ -34,6 +34,8 @@ def main():
     screen.fill(pygame.Color('white'))
 
     while running:
+        a = time.time()
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
@@ -54,10 +56,11 @@ def main():
         # don't really need a delay
         # dt is delta time in seconds since last frame, used for framerate-
         # independent physics.
-        dt = clock.tick(10) / 1000
+        dt = clock.tick(0) / 1000
+
+        print(time.time() - a)
 
     pygame.quit()
-
 
 
 if __name__ == '__main__':
