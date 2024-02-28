@@ -25,9 +25,11 @@ class AntWorld(object):
         self.world = numpy.zeros((width_cells, height_cells))
 
         # Hard-code a few obstacles for now
-        self.world[40:60, 10:15] = 1
-        self.world[60:80, 60:100] = 1
-        self.world[20:30, 50:80] = 1
+        # 640, 380 for now 
+        self.world[400:500, 100:150] = 1
+        self.world[100:300, 200:300] = 1
+        self.world[100:300, 0:100] = 1
+
 
     def worldSpaceToPixelSpace(self, x, y):
         """
