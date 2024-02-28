@@ -6,7 +6,7 @@ Class to represent the world
 
 import numpy as np
 import pygame
-from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, CellData
+from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, FOODOBJECT, CellData
 
 NUM_PHEROMONES = 2
 PHEROMONE_INDEX = {HOMEPHEROMONE: 1, FOODPHEROMONE: 2}
@@ -33,6 +33,7 @@ class AntWorld(object):
         self.world[400:500, 100:150,0] = self.world[400:500, 100:150,0] * WALL / EMPTY
         self.world[100:300, 200:300,0] = self.world[100:300, 200:300,0] * WALL / EMPTY
         self.world[100:300, 0:100,0] = self.world[100:300, 0:100,0] * WALL / EMPTY
+        self.world[0:50, 0:50,0] = self.world[0:50, 0:50,0] * FOODOBJECT / EMPTY
 
 
     def worldSpaceToPixelSpace(self, x, y):
@@ -58,7 +59,7 @@ class AntWorld(object):
         """
 
         i, j = self.worldSpaceToPixelSpace(x, y)
-        return self.isWithinBounds(i, j) and self.world[i][j][0] == EMPTY
+        return self.isWithinBounds(i, j) and self.world[i][j][0] == EMPTY, self.world[i][j][0] if  self.isWithinBounds(i, j) else None
 
     def addPheromone(self, x: float, y: float, pheromone: int, amnt: int=1):
         i, j = self.worldSpaceToPixelSpace(x, y)
@@ -79,6 +80,7 @@ class AntWorld(object):
         pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(400, 100, 100, 50))
         pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 200, 200, 100))
         pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 0, 200, 100))
+        pygame.draw.rect(screen, pygame.Color('chartreuse4'), pygame.Rect(0, 0, 50, 50))
 
         for idx, cell in np.ndenumerate(self.world[:,:,0]):
             # if cell == WALL:

@@ -41,8 +41,8 @@ class Ant(object):
     def move(self, angle, distance):
         new_x = self.xPosition + math.cos(angle) * distance
         new_y = self.yPosition + math.sin(angle) * distance
-
-        if self.world.isFreePosition(new_x, new_y):
+        isFree, objType = self.world.isFreePosition(new_x, new_y)
+        if isFree:
             self.xPosition = new_x
             self.yPosition = new_y
             self.world.addPheromone(self.xPosition, self.yPosition, self.mode)
@@ -51,7 +51,7 @@ class Ant(object):
             return False
 
     def randomExplore(self, delta_t):
-        direction_adj = np.random.uniform(-1, 1) * ANGLEOFCHANGE
+        direction_adj = np.random.uniform(-1, 1) * ANGLEOFCHANGE + 0
         direction = self.exploreDirection + direction_adj
 
         if not self.move(direction, self.antSpeed * delta_t):

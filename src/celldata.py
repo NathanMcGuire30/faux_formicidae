@@ -18,6 +18,7 @@ WALL = 5
 ANT = 7
 HOMEPHEROMONE = 11
 FOODPHEROMONE = 13
+FOODOBJECT = 17
 
 # D: we need to quantify pheromone intensity unique to each type of pheromone
 
@@ -29,7 +30,8 @@ class CellData:
         isAnt = self.entityExists(data, ANT)
         isHome = self.entityExists(data, HOMEPHEROMONE)
         isFood = self.entityExists(data, FOODPHEROMONE)
-        return isEmpty, isWall, isAnt, isHome, isFood
+        isFoodObj = self.entityExists(data, FOODOBJECT)
+        return isEmpty, isWall, isAnt, isHome, isFood, isFoodObj
     
     def entityExists(self, data: int, entityType: int):
         return int(data) % entityType == 0
