@@ -7,15 +7,12 @@ import numpy as np
 from simulation import Simulation
 from world import AntWorld
 from ant import Ant
-from visualization import visualizeWorldMatplotlib
-# colors
-BROWN = (139, 69, 19)
-BLACK = (0,0,0)
-WHITE = (255,255,255)
 
 WIDTHSCALE = 16
 HEIGHTSCALE = 9
 RESOLUTION = 40
+
+COLONY_START_SIZE = 100
 
 def main():
     
@@ -23,9 +20,9 @@ def main():
 
     sim = Simulation(world)
 
-    # Add 10 ants
-    for i in range(200):
-        sim.addAnt(Ant(), 1, 1)
+    # Add ants
+    for _ in range(COLONY_START_SIZE):
+        sim.addAnt(Ant(), 8, 5)
 
     # pygame setup
     pygame.init()
@@ -34,7 +31,7 @@ def main():
     running = True
     dt = 0
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill(WHITE)
+    screen.fill(pygame.Color('white'))
 
     while running:
         # poll for events
@@ -43,48 +40,21 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        # Step the sim once
-        sim.runOnce()
-
-
         # fill the screen with a color to wipe away anything from last frame
-        screen.fill(WHITE)
-        # Draw Ants
-        all_ants = sim.getAnts()
-        for ant in all_ants:
-            pygame.draw.circle(screen, BROWN, ant.getPositionPixelSpace(), 5)
+        screen.fill(pygame.Color('white'))
 
-            
-        all_cells = sim.getWorld().world
-        for idx, cell in np.ndenumerate(all_cells):
-            if cell == 1:
-                # x, y = sim.getWorld().worldSpaceToPixelSpace(idx[0], idx[1])
-                pygame.draw.rect(screen, BLACK, pygame.Rect(idx[0], idx[1], 1, 1), 10)
-        
-        # Boundaries
-        # x = max(0, min(screen.get_width(), x))
-        # y = max(0, min(screen.get_height(), y))
-
-
-        keys = pygame.key.get_pressed()
-        # if keys[pygame.K_w]:
-        #     player_pos.y -= 300 * dt
-        # if keys[pygame.K_s]:
-        #     player_pos.y += 300 * dt
-        # if keys[pygame.K_a]:
-        #     player_pos.x -= 300 * dt
-        # if keys[pygame.K_d]:
-        #     player_pos.x += 300 * dt
-        if keys[pygame.K_ESCAPE]:
-            running = False
+        # Step the sim once
+        # also renders
+        sim.runOnce(screen)
 
         # flip() the display to put your work on screen
         pygame.display.flip()
 
-        # limits FPS to 60
+        # limits FPS to 10
+        # don't really need a delay
         # dt is delta time in seconds since last frame, used for framerate-
         # independent physics.
-        dt = clock.tick(60) / 1000
+        dt = clock.tick(10) / 1000
 
     pygame.quit()
 

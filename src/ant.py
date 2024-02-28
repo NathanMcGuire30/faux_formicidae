@@ -6,18 +6,19 @@ Class to represent single ant
 
 import math
 import random
+import numpy as np
 
 from world import AntWorld
 
-ANGLEOFCHANGE = 0.8
+ANGLEOFCHANGE = 0.75
 
 class Ant(object):
-    def __init__(self, world: AntWorld = None, x=0, y=0):
+    def __init__(self, world: AntWorld = None, x=0, y=0, speed=1):
         self.xPosition = x
         self.yPosition = y
         self.world = world
 
-        self.antSpeed = 1  # cm/s
+        self.antSpeed = speed  # cm/s
 
         self.exploreDirection = random.random() * 2 * math.pi
 
@@ -46,11 +47,12 @@ class Ant(object):
             return False
 
     def randomExplore(self, delta_t):
-        direction_adj = random.random() * ANGLEOFCHANGE
+        direction_adj = np.random.uniform(-1, 1) * ANGLEOFCHANGE
         direction = self.exploreDirection + direction_adj
 
         if not self.move(direction, self.antSpeed * delta_t):
-            self.exploreDirection = random.random() * 2 * math.pi
+            # if can't move, turn around and wander in a direction
+            self.exploreDirection = direction + math.pi + np.random.uniform(-1, 1) * ANGLEOFCHANGE
 
     def runOnce(self, delta_t):
         """

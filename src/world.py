@@ -4,8 +4,10 @@
 Class to represent the world
 """
 
-import numpy
+import numpy as np
+import pygame
 
+NUM_PHEROMONES = 2
 
 class AntWorld(object):
     def __init__(self, width_cm: int, height_cm: int, resolution: int):
@@ -22,13 +24,13 @@ class AntWorld(object):
         # Currently 0s in this array are free, 1s are occupied, probably need to work on this some eventually
         # Question, how to implement pheromones.  Do we make a new array, or do we add more values to this one?
         # If multiple types of pheromones can occupy the same cell we'll probably need multiple arrays
-        self.world = numpy.zeros((width_cells, height_cells))
+        self.world = np.zeros((width_cells, height_cells,NUM_PHEROMONES))
 
         # Hard-code a few obstacles for now
         # 640, 380 for now 
-        self.world[400:500, 100:150] = 1
-        self.world[100:300, 200:300] = 1
-        self.world[100:300, 0:100] = 1
+        self.world[400:500, 100:150,] = 1
+        self.world[100:300, 200:300,] = 1
+        self.world[100:300, 0:100,] = 1
 
 
     def worldSpaceToPixelSpace(self, x, y):
@@ -54,7 +56,7 @@ class AntWorld(object):
         """
 
         i, j = self.worldSpaceToPixelSpace(x, y)
-        return self.isWithinBounds(i, j) and self.world[i][j] == 0
+        return self.isWithinBounds(i, j) and self.world[i][j][0] == 0
 
     def runOnce(self, delta_t):
         """
@@ -65,3 +67,8 @@ class AntWorld(object):
         """
 
         pass
+    def render(self, screen):
+        for idx, cell in np.ndenumerate(self.world[:,:,0]):
+            if cell == 1:
+                pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(idx[0], idx[1], 1, 1), 10)
+        

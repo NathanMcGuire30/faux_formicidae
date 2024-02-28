@@ -7,6 +7,7 @@ Contains a world and a list of ant colony classes, manages the updates of each
 """
 
 import typing
+import pygame
 
 from world import AntWorld
 from ant import Ant
@@ -33,7 +34,7 @@ class Simulation(object):
     def getAnts(self):
         return self.ants
 
-    def runOnce(self, delta_t=0.1):
+    def runOnce(self, screen, delta_t=0.1):
         """
         Function to advance the simulation one time step
         :param delta_t: time step length, in seconds
@@ -42,7 +43,9 @@ class Simulation(object):
 
         # Update the world
         self.world.runOnce(delta_t)
+        self.world.render(screen)
 
         # Update the ants
         for ant in self.ants:
             ant.runOnce(delta_t)
+            pygame.draw.circle(screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 5)

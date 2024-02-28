@@ -19,9 +19,11 @@ ANT = 7
 HOMEPHEROMONE = 11
 FOODPHEROMONE = 13
 
+# D: we need to quantify pheromone intensity unique to each type of pheromone
+
 class CellData:
 
-    def convert(self, data: int):
+    def convert(self, data: float):
         isEmpty = self.entityExists(data, EMPTY)
         isWall = self.entityExists(data, WALL)
         isAnt = self.entityExists(data, ANT)
@@ -29,11 +31,28 @@ class CellData:
         isFood = self.entityExists(data, FOODPHEROMONE)
         return isEmpty, isWall, isAnt, isHome, isFood
     
-    def entityExists(self, data: int, entityType: int):
-        return data % entityType == 0
+    def entityExists(self, data: float, entityType: int):
+        return int(data) % entityType == 0
 
-    def add(self, data:int, newVal):
-        return data * newVal
+    def add(self, data:float, newVal):
+        return data if self.entityExists(data, newVal) else int(data) * newVal + (data - int(data))
     
-    def remove(self, data:int, remVal):
-        return data / remVal
+    def remove(self, data:float, remVal):
+        return int(data) / remVal + (data - int(data)) if self.entityExists(data, remVal) else data 
+
+# Process:
+    # Want to use a single array, so how can I fit multiple identifiers in a single cell
+    # could use a concatenated string, but how does that fit into an np array
+    # lets just use numbers and convert to a string, but that just lets us use 0-9
+    # well how do we add/remove values to this list, we can't just add them
+    # we can separate each digit by multiplying by 10 and adding the digit we want
+    # well this means we can't use 0, if we use 0 we cant add anything
+    # also how do we remove a value, have to convert to a string and remove
+    # can we remove values any faster, what if we multiplied/divided
+    # well if we have a lot of numbers then we can have common factors
+    # well there are some numbers that don't have any common factors, prime numbers
+    # we can set each entity to a unique prime number. 
+    # We can check its existance by using the modulo operator
+    # we can add it by multiplying
+    # we can remove it by dividing
+    # we just need to keep track of what entity matches to a prime number
