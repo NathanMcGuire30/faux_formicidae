@@ -19,15 +19,15 @@ class AntWorld(object):
         :param resolution: World resolution (cells per centimeter)
         """
 
-        width_cells = width_cm * resolution
-        height_cells = height_cm * resolution
+        self.widthCells = width_cm * resolution
+        self.heightCells = height_cm * resolution
         self.resolution = resolution
 
         # Currently 0s in this array are free, 1s are occupied, probably need to work on this some eventually
         # Question, how to implement pheromones.  Do we make a new array, or do we add more values to this one?
         # If multiple types of pheromones can occupy the same cell we'll probably need multiple arrays
         # Layer 0 is obstacles
-        self.world = np.zeros((width_cells, height_cells, NUM_PHEROMONES + 1))
+        self.world = np.zeros((self.widthCells, self.heightCells, NUM_PHEROMONES + 1))
 
         # Hard-code a few obstacles for now
         # 640, 380 for now 
@@ -72,12 +72,3 @@ class AntWorld(object):
         """
 
         pass
-
-    def render(self, screen):
-        obstacles = self.getLayer(0).astype(np.uint8).T
-        obstacles = (1 - obstacles) * 255
-
-        obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
-
-        pygame_img = pygame.image.frombuffer(obstacles_img.tostring(), obstacles_img.shape[1::-1], "BGR")
-        screen.blit(pygame_img, (0, 0))
