@@ -5,9 +5,11 @@ Class to represent the world
 """
 
 import numpy as np
+import cv2
 import pygame
 
 NUM_PHEROMONES = 2
+
 
 class AntWorld(object):
     def __init__(self, width_cm: int, height_cm: int, resolution: int):
@@ -24,14 +26,14 @@ class AntWorld(object):
         # Currently 0s in this array are free, 1s are occupied, probably need to work on this some eventually
         # Question, how to implement pheromones.  Do we make a new array, or do we add more values to this one?
         # If multiple types of pheromones can occupy the same cell we'll probably need multiple arrays
-        self.world = np.zeros((width_cells, height_cells,NUM_PHEROMONES))
+        # Layer 0 is obstacles
+        self.world = np.zeros((width_cells, height_cells, NUM_PHEROMONES + 1))
 
         # Hard-code a few obstacles for now
         # 640, 380 for now 
-        self.world[400:500, 100:150,] = 1
-        self.world[100:300, 200:300,] = 1
-        self.world[100:300, 0:100,] = 1
-
+        self.world[400:500, 100:150, 0] = 1
+        self.world[100:300, 200:300, 0] = 1
+        self.world[100:300, 0:100, 0] = 1
 
     def worldSpaceToPixelSpace(self, x, y):
         """
@@ -58,6 +60,9 @@ class AntWorld(object):
         i, j = self.worldSpaceToPixelSpace(x, y)
         return self.isWithinBounds(i, j) and self.world[i][j][0] == 0
 
+    def getLayer(self, layer_id: int):
+        return self.world[:, :, layer_id]
+
     def runOnce(self, delta_t):
         """
         Advance the simulation one timestep.  Since the world doesn't change yet, this function does nothing
@@ -67,8 +72,12 @@ class AntWorld(object):
         """
 
         pass
+
     def render(self, screen):
-        for idx, cell in np.ndenumerate(self.world[:,:,0]):
-            if cell == 1:
-                pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(idx[0], idx[1], 1, 1), 10)
-        
+        obstacles = self.getLayer(0).astype(np.uint8).T
+        obstacles = (1 - obstacles) * 255
+
+        obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
+
+        pygame_img = pygame.image.frombuffer(obstacles_img.tostring(), obstacles_img.shape[1::-1], "BGR")
+        screen.blit(pygame_img, (0, 0))
