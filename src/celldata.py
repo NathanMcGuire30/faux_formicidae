@@ -23,7 +23,7 @@ FOODPHEROMONE = 13
 
 class CellData:
 
-    def convert(self, data: float):
+    def convert(self, data: int):
         isEmpty = self.entityExists(data, EMPTY)
         isWall = self.entityExists(data, WALL)
         isAnt = self.entityExists(data, ANT)
@@ -31,14 +31,14 @@ class CellData:
         isFood = self.entityExists(data, FOODPHEROMONE)
         return isEmpty, isWall, isAnt, isHome, isFood
     
-    def entityExists(self, data: float, entityType: int):
+    def entityExists(self, data: int, entityType: int):
         return int(data) % entityType == 0
 
-    def add(self, data:float, newVal):
-        return data if self.entityExists(data, newVal) else int(data) * newVal + (data - int(data))
+    def add(self, data:int, newVal):
+        return data if self.entityExists(data, newVal) else int(data) * newVal
     
-    def remove(self, data:float, remVal):
-        return int(data) / remVal + (data - int(data)) if self.entityExists(data, remVal) else data 
+    def remove(self, data:int, remVal):
+        return int(data) / remVal if self.entityExists(data, remVal) else data 
 
 # Process:
     # Want to use a single array, so how can I fit multiple identifiers in a single cell

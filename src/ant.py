@@ -9,6 +9,7 @@ import random
 import numpy as np
 
 from world import AntWorld
+from celldata import HOMEPHEROMONE, FOODPHEROMONE
 
 ANGLEOFCHANGE = 0.75
 
@@ -19,6 +20,8 @@ class Ant(object):
         self.world = world
 
         self.antSpeed = speed  # cm/s
+
+        self.mode = HOMEPHEROMONE
 
         self.exploreDirection = random.random() * 2 * math.pi
 
@@ -42,6 +45,7 @@ class Ant(object):
         if self.world.isFreePosition(new_x, new_y):
             self.xPosition = new_x
             self.yPosition = new_y
+            self.world.addPheromone(self.xPosition, self.yPosition, self.mode)
             return True
         else:
             return False
@@ -52,6 +56,8 @@ class Ant(object):
 
         if not self.move(direction, self.antSpeed * delta_t):
             # if can't move, turn around and wander in a direction
+            # change colors for testing
+            self.mode = FOODPHEROMONE
             self.exploreDirection = direction + math.pi + np.random.uniform(-1, 1) * ANGLEOFCHANGE
 
     def runOnce(self, delta_t):

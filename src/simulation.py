@@ -48,4 +48,4 @@ class Simulation(object):
         # Update the ants
         for ant in self.ants:
             ant.runOnce(delta_t)
-            pygame.draw.circle(screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 5)
+            pygame.draw.circle(screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 2)
