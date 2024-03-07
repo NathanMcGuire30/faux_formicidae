@@ -1,67 +1,45 @@
 #!/usr/bin/env python3
 
 import time
-import pygame
-import numpy as np
 
 from simulation import Simulation
 from world import AntWorld
 from ant import Ant
+from renderer import Renderer
 
-WIDTHSCALE = 16
-HEIGHTSCALE = 9
+WIDTH_SCALE = 16
+HEIGHT_SCALE = 9
 RESOLUTION = 40
 
 COLONY_START_SIZE = 100
 
 
 def main():
-    world = AntWorld(WIDTHSCALE, HEIGHTSCALE, RESOLUTION)
+    world = AntWorld(WIDTH_SCALE, HEIGHT_SCALE, RESOLUTION)
 
     sim = Simulation(world)
+    renderer = Renderer(sim)
 
     # Add ants
     for _ in range(COLONY_START_SIZE):
         sim.addAnt(Ant(), 320, 180)
 
-    # pygame setup
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTHSCALE * RESOLUTION, HEIGHTSCALE * RESOLUTION))
-    clock = pygame.time.Clock()
-    running = True
-    dt = 0
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill(pygame.Color('white'))
+    dt = 0.01
 
-    while running:
-        a = time.time()
-
-        # poll for events
-        # pygame.QUIT event means the user clicked X to close your window
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # fill the screen with a color to wipe away anything from last frame
-        screen.fill(pygame.Color('white'))
+    while renderer.running():
+        # a = time.time()
 
         # Step the sim once
-        # also renders
-        sim.runOnce(screen)
+        sim.runOnce(dt)
 
-        # flip() the display to put your work on screen
-        pygame.display.flip()
+        # Render
+        renderer.render()
 
-        # limits FPS to 10
-        # don't really need a delay
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
-        dt = clock.tick(20) / 1000
+        time.sleep(0.01)
 
-        print(time.time() - a)
+        # print(time.time() - a)
 
-    pygame.quit()
-
+    renderer.quit()
 
 if __name__ == '__main__':
     main()

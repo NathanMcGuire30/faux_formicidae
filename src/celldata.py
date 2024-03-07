@@ -20,6 +20,11 @@ HOMEPHEROMONE = 11
 FOODPHEROMONE = 13
 FOODOBJECT = 17
 
+ENTITY_COLOR = {EMPTY: (255,255,255), WALL: (0,0,0)}
+                # ANT: (139, 69, 19), HOMEPHEROMONE: (65, 105, 225),
+                # FOODPHEROMONE: (34, 139, 34)}
+
+
 # D: we need to quantify pheromone intensity unique to each type of pheromone
 
 class CellData:

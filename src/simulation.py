@@ -36,7 +36,7 @@ class Simulation(object):
     def getAnts(self):
         return self.ants
 
-    def runOnce(self, screen, delta_t=0.1):
+    def runOnce(self, delta_t=0.1):
         """
         Function to advance the simulation one time step
         :param delta_t: time step length, in seconds
@@ -45,9 +45,7 @@ class Simulation(object):
 
         # Update the world
         self.world.runOnce(delta_t)
-        self.world.render(screen)
 
         # Update the ants
         for ant in self.ants:
             ant.runOnce(delta_t)
-            pygame.draw.circle(screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 2)
