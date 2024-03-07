@@ -12,8 +12,6 @@ from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, FOODOBJECT, Cell
 NUM_PHEROMONES = 2
 PHEROMONE_INDEX = {HOMEPHEROMONE: 1, FOODPHEROMONE: 2}
 
-
-
 class AntWorld(object):
     def __init__(self, width_cm: int, height_cm: int, resolution: int):
         """
@@ -36,7 +34,7 @@ class AntWorld(object):
         self.world[400:500, 100:150,0] = self.world[400:500, 100:150,0] * WALL / EMPTY
         self.world[100:300, 200:300,0] = self.world[100:300, 200:300,0] * WALL / EMPTY
         self.world[100:300, 0:100,0] = self.world[100:300, 0:100,0] * WALL / EMPTY
-        # self.world[0:50, 0:50,0] = self.world[0:50, 0:50,0] * FOODOBJECT / EMPTY
+        self.world[0:50, 0:50,0] = self.world[0:50, 0:50,0] * FOODOBJECT / EMPTY
 
     def worldSpaceToPixelSpace(self, x, y):
         """
@@ -87,11 +85,15 @@ class AntWorld(object):
         return self.world[:, :, layer_id]
 
     def runOnce(self, delta_t):
+        
         """
         Advance the simulation one timestep.  Since the world doesn't change yet, this function does nothing
         If the world ever changes that code should go in here
 
         :param delta_t: timestep in seconds
         """
+        evaporate_step = 0.005
+        threshold = 0
+        for pheromone in PHEROMONE_INDEX.keys():
+            np.clip((self.world[:, :, PHEROMONE_INDEX[pheromone]] - evaporate_step), threshold, None, self.world[:, :, PHEROMONE_INDEX[pheromone]])
 
-        pass

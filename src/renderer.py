@@ -37,9 +37,7 @@ class Renderer(object):
         self.renderPheromoneFast(1, cv2.COLORMAP_OCEAN)
         self.renderPheromoneFast(2, cv2.COLORMAP_DEEPGREEN)
 
-        # world_surface.blit(pheromone_surface, (0,0))
-        # self.screen.blit(world_surface,(0,0))
-        self.renderAnts()
+        # self.renderAnts()
 
         # flip() the display to put your work on screen
         pygame.display.flip()
