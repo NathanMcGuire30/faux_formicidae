@@ -19,7 +19,8 @@ class Simulation(object):
 
         self.ants: typing.List[Ant] = []
 
-    def addAnt(self, ant: Ant, x: float, y: float):
+    def addAnt(self, ant: Ant, i: int, j: int):
+        x, y = self.world.pixelSpaceToWorldSpace(i, j)
         isFree, objType = self.world.isFreePosition(x, y)
         if isFree:
             self.ants.append(ant)

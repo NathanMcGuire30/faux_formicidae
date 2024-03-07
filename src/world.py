@@ -63,10 +63,25 @@ class AntWorld(object):
         i, j = self.worldSpaceToPixelSpace(x, y)
         return self.isWithinBounds(i, j) and self.world[i][j][0] == EMPTY, self.world[i][j][0] if  self.isWithinBounds(i, j) else None
 
-    def addPheromone(self, x: float, y: float, pheromone: int, amnt: int=1):
+    # Pheromone as a float
+    # whole numbers is amount of time since epoch the last pheromone was updated
+    # decimal number is the strength of the pheromone [0,1)
+    def changePheromone(self, x: float, y: float, pheromone: int, amnt: int=1):
         i, j = self.worldSpaceToPixelSpace(x, y)
         self.world[i, j, PHEROMONE_INDEX[pheromone]] = amnt
         return
+
+    def addPheromone(self, x: int, y: int, pheromone: int, amnt: int=1):
+        """
+        Refresh the pheromone at the given location with the current time since epoch
+        """
+        return self.changePheromone(x, y, pheromone, amnt)
+
+    def determinePheromoneStrenght(self, x: int, y: int, pheromone: int, step: float = -0.1):
+        """
+        Convert the timestamp of the pheromone at the given location to a strength metric
+        """
+        return self.changePheromone(x, y, pheromone, step)
 
     def getLayer(self, layer_id: int):
         return self.world[:, :, layer_id]
@@ -83,10 +98,10 @@ class AntWorld(object):
 
     def render(self, screen):
         
-        # pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(400, 100, 100, 50))
-        # pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 200, 200, 100))
-        # pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 0, 200, 100))
-        pygame.draw.rect(screen, pygame.Color('chartreuse4'), pygame.Rect(0, 0, 50, 50))
+        pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(400, 100, 100, 50))
+        pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 200, 200, 100))
+        pygame.draw.rect(screen, pygame.Color('black'), pygame.Rect(100, 0, 200, 100))
+        # pygame.draw.rect(screen, pygame.Color('chartreuse4'), pygame.Rect(0, 0, 50, 50))
 
         for idx, cell in np.ndenumerate(self.world[:,:,0]):
             # if cell == WALL:
@@ -101,10 +116,10 @@ class AntWorld(object):
                 pygame.draw.rect(screen, pygame.Color('green'), pygame.Rect(idx[0], idx[1], 1, 1))
         
 
-        obstacles = self.getLayer(0).astype(np.uint8).T
-        obstacles = (1 - obstacles) * 255
+        # obstacles = self.getLayer(0).astype(np.uint8).T
+        # obstacles = (WALL - obstacles) * 255
 
-        obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
+        # obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
 
-        pygame_img = pygame.image.frombuffer(obstacles_img.tostring(), obstacles_img.shape[1::-1], "BGR")
-        screen.blit(pygame_img, (0, 0))
+        # pygame_img = pygame.image.frombuffer(obstacles_img.tostring(), obstacles_img.shape[1::-1], "BGR")
+        # screen.blit(pygame_img, (0, 0))

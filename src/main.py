@@ -22,7 +22,7 @@ def main():
 
     # Add ants
     for _ in range(COLONY_START_SIZE):
-        sim.addAnt(Ant(), 8, 5)
+        sim.addAnt(Ant(), 320, 180)
 
     # pygame setup
     pygame.init()
@@ -56,7 +56,7 @@ def main():
         # don't really need a delay
         # dt is delta time in seconds since last frame, used for framerate-
         # independent physics.
-        dt = clock.tick(0) / 1000
+        dt = clock.tick(20) / 1000
 
         print(time.time() - a)
 
