@@ -33,8 +33,9 @@ class Renderer(object):
         self.screen.fill(pygame.Color('white'))
 
         self.renderWorld()
-
-        self.renderPheromone()
+        
+        self.renderPheromoneFast(1, cv2.COLORMAP_OCEAN)
+        self.renderPheromoneFast(2, cv2.COLORMAP_DEEPGREEN)
 
         # world_surface.blit(pheromone_surface, (0,0))
         # self.screen.blit(world_surface,(0,0))
@@ -67,6 +68,18 @@ class Renderer(object):
         obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
 
         pygame_img = pygame.image.frombuffer(obstacles_img.tostring(), obstacles_img.shape[1::-1], "BGR")
+        pygame_img.set_colorkey((255,255,255))
+        # return pygame_img
+        self.screen.blit(pygame_img, (0, 0))
+
+    def renderPheromoneFast(self, layer, colormap):
+        pheromones = self.sim.getWorld().getLayer(layer).astype(np.float64).T
+        pheromones = ((1-pheromones) * 255).astype(np.uint8)
+
+        pheromones_img = cv2.applyColorMap(pheromones, colormap)
+
+        pygame_img = pygame.image.frombuffer(pheromones_img.tostring(), pheromones_img.shape[1::-1], "BGR")
+        pygame_img.set_colorkey((255,255,255))
         # return pygame_img
         self.screen.blit(pygame_img, (0, 0))
 

@@ -82,7 +82,7 @@ class Ant(object):
             self.xPosition = new_x
             self.yPosition = new_y
             # self.world.reducePheromone(self.xPosition, self.yPosition)
-            self.world.addPheromone(self.xPosition, self.yPosition, self.mode)
+            self.world.addPheromone(self.xPosition, self.yPosition, self.mode, amnt=np.random.uniform(0, 1))
             return True
         else:
             return False

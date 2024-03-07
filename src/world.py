@@ -66,12 +66,12 @@ class AntWorld(object):
     # Pheromone as a float
     # whole numbers is amount of time since epoch the last pheromone was updated
     # decimal number is the strength of the pheromone [0,1)
-    def changePheromone(self, x: float, y: float, pheromone: int, amnt: int=1):
+    def changePheromone(self, x: float, y: float, pheromone: int, amnt: float=1.0):
         i, j = self.worldSpaceToPixelSpace(x, y)
         self.world[i, j, PHEROMONE_INDEX[pheromone]] = amnt
         return
 
-    def addPheromone(self, x: int, y: int, pheromone: int, amnt: int=1):
+    def addPheromone(self, x: int, y: int, pheromone: int, amnt: float=1.0):
         """
         Refresh the pheromone at the given location with the current time since epoch
         """
