@@ -12,6 +12,7 @@ from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, FOODOBJECT, Cell
 NUM_PHEROMONES = 2
 PHEROMONE_INDEX = {HOMEPHEROMONE: 1, FOODPHEROMONE: 2}
 
+
 class AntWorld(object):
     def __init__(self, width_cm: int, height_cm: int, resolution: int):
         """
@@ -28,13 +29,13 @@ class AntWorld(object):
         # Question, how to implement pheromones.  Do we make a new array, or do we add more values to this one?
         # If multiple types of pheromones can occupy the same cell we'll probably need multiple arrays
         self.world = np.zeros((self.widthCells, self.heightCells, NUM_PHEROMONES + 1))
-        self.world[:,:,0] += EMPTY
+        self.world[:, :, 0] += EMPTY
         # Hard-code a few obstacles for now
         # 640, 380 for now 
-        self.world[400:500, 100:150,0] = self.world[400:500, 100:150,0] * WALL / EMPTY
-        self.world[100:300, 200:300,0] = self.world[100:300, 200:300,0] * WALL / EMPTY
-        self.world[100:300, 0:100,0] = self.world[100:300, 0:100,0] * WALL / EMPTY
-        self.world[0:50, 0:50,0] = self.world[0:50, 0:50,0] * FOODOBJECT / EMPTY
+        self.world[400:500, 100:150, 0] = self.world[400:500, 100:150, 0] * WALL / EMPTY
+        self.world[100:300, 200:300, 0] = self.world[100:300, 200:300, 0] * WALL / EMPTY
+        self.world[100:300, 0:100, 0] = self.world[100:300, 0:100, 0] * WALL / EMPTY
+        self.world[0:50, 0:50, 0] = self.world[0:50, 0:50, 0] * FOODOBJECT / EMPTY
 
     def worldSpaceToPixelSpace(self, x, y):
         """
@@ -59,17 +60,17 @@ class AntWorld(object):
         """
 
         i, j = self.worldSpaceToPixelSpace(x, y)
-        return self.isWithinBounds(i, j) and self.world[i][j][0] == EMPTY, self.world[i][j][0] if  self.isWithinBounds(i, j) else None
+        return self.isWithinBounds(i, j) and self.world[i][j][0] == EMPTY, self.world[i][j][0] if self.isWithinBounds(i, j) else None
 
     # Pheromone as a float
     # whole numbers is amount of time since epoch the last pheromone was updated
     # decimal number is the strength of the pheromone [0,1)
-    def changePheromone(self, x: float, y: float, pheromone: int, amnt: float=1.0):
+    def changePheromone(self, x: float, y: float, pheromone: int, amnt: float = 1.0):
         i, j = self.worldSpaceToPixelSpace(x, y)
         self.world[i, j, PHEROMONE_INDEX[pheromone]] = amnt
         return
 
-    def addPheromone(self, x: int, y: int, pheromone: int, amnt: float=1.0):
+    def addPheromone(self, x: int, y: int, pheromone: int, amnt: float = 1.0):
         """
         Refresh the pheromone at the given location with the current time since epoch
         """
@@ -85,15 +86,15 @@ class AntWorld(object):
         return self.world[:, :, layer_id]
 
     def runOnce(self, delta_t):
-        
         """
         Advance the simulation one timestep.  Since the world doesn't change yet, this function does nothing
         If the world ever changes that code should go in here
 
         :param delta_t: timestep in seconds
         """
-        evaporate_step = 0.005
+
+        evaporate_step = 0.1 * delta_t
+
         threshold = 0
         for pheromone in PHEROMONE_INDEX.keys():
             np.clip((self.world[:, :, PHEROMONE_INDEX[pheromone]] - evaporate_step), threshold, None, self.world[:, :, PHEROMONE_INDEX[pheromone]])
-

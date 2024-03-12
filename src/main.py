@@ -11,7 +11,7 @@ WIDTH_SCALE = 16
 HEIGHT_SCALE = 9
 RESOLUTION = 40
 
-COLONY_START_SIZE = 300
+COLONY_START_SIZE = 100
 
 
 def main():
@@ -24,7 +24,7 @@ def main():
     for _ in range(COLONY_START_SIZE):
         sim.addAnt(Ant(), 320, 180)
 
-    dt = 0.01
+    dt = 0.05
 
     while renderer.running():
         # a = time.time()
@@ -35,11 +35,12 @@ def main():
         # Render
         renderer.render()
 
-        time.sleep(0.01)
+        # time.sleep(0.01)
 
         # print(time.time() - a)
 
     renderer.quit()
+
 
 if __name__ == '__main__':
     main()
