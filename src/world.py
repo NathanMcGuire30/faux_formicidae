@@ -5,8 +5,8 @@ Class to represent the world
 """
 
 import numpy as np
-import cv2
-import pygame
+from skimage.draw import line
+
 from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, FOODOBJECT, CellData
 
 NUM_PHEROMONES = 2
@@ -75,6 +75,17 @@ class AntWorld(object):
         Refresh the pheromone at the given location with the current time since epoch
         """
         return self.changePheromone(x, y, pheromone, amnt)
+
+    def addPheromoneLine(self, start, end, pheromone, amount: float = 1.0):
+        s_i, s_j = self.worldSpaceToPixelSpace(start[0], start[1])
+        e_i, e_j = self.worldSpaceToPixelSpace(end[0], end[1])
+
+        discrete_line = list(zip(*line(s_i, s_j, e_i, e_j)))
+
+        for point in discrete_line:
+            self.world[point[0], point[1], PHEROMONE_INDEX[pheromone]] = amount
+
+        pass
 
     def determinePheromoneStrenght(self, x: int, y: int, pheromone: int, step: float = -0.1):
         """

@@ -87,11 +87,13 @@ class Ant(object):
         new_x = self.xPosition + math.cos(angle) * distance
         new_y = self.yPosition + math.sin(angle) * distance
         isFree, objType = self.world.isFreePosition(new_x, new_y)
+
         if isFree:
+            self.world.addPheromoneLine((self.xPosition, self.yPosition), (new_x, new_y), self.mode)
+
             self.xPosition = new_x
             self.yPosition = new_y
-            # self.world.reducePheromone(self.xPosition, self.yPosition)
-            self.world.addPheromone(self.xPosition, self.yPosition, self.mode)
+
             return True
         else:
             # for testing, just swap modes each collision

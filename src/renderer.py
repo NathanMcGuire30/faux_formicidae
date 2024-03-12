@@ -38,7 +38,7 @@ class Renderer(object):
         self.renderWorld()
 
         self.renderPheromoneFast(1, (0, 0, 255))
-        # self.renderPheromoneFast(2, (0, 255, 0))
+        self.renderPheromoneFast(2, (0, 100, 0))
 
         self.renderAnts()
 
