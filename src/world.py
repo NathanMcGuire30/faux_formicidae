@@ -33,9 +33,16 @@ class AntWorld(object):
         # Hard-code a few obstacles for now
         # 640, 380 for now 
         self.world[400:500, 100:150, 0] = self.world[400:500, 100:150, 0] * WALL / EMPTY
-        self.world[100:300, 200:300, 0] = self.world[100:300, 200:300, 0] * WALL / EMPTY
-        self.world[100:300, 0:100, 0] = self.world[100:300, 0:100, 0] * WALL / EMPTY
+        # self.world[100:300, 200:300, 0] = self.world[100:300, 200:300, 0] * WALL / EMPTY
+        # self.world[100:300, 0:100, 0] = self.world[100:300, 0:100, 0] * WALL / EMPTY
         self.world[0:50, 0:50, 0] = self.world[0:50, 0:50, 0] * FOODOBJECT / EMPTY
+        self.world[590:640, 330:380, 0] = self.world[590:640, 330:380, 0] * FOODOBJECT / EMPTY
+
+    def getWidth(self):
+        return self.widthCells
+
+    def getHeight(self):
+        return self.heightCells
 
     def worldSpaceToPixelSpace(self, x, y):
         """

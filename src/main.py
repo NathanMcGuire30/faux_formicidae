@@ -13,6 +13,9 @@ RESOLUTION = 40
 
 COLONY_START_SIZE = 100
 
+X_Start = 320
+Y_Start = 180
+
 
 def main():
     world = AntWorld(WIDTH_SCALE, HEIGHT_SCALE, RESOLUTION)
@@ -22,7 +25,7 @@ def main():
 
     # Add ants
     for _ in range(COLONY_START_SIZE):
-        sim.addAnt(Ant(), 320, 180)
+        sim.addAnt(Ant(), X_Start, Y_Start)
 
     dt = 0.05
 
