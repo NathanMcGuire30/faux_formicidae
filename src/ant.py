@@ -44,7 +44,7 @@ def get_adjacent_directions(direction):
 # an ant going for food will follow the food trail in the direction away of home
 
 class Ant(object):
-    def __init__(self, world: AntWorld = None, x=0, y=0, speed=1):
+    def __init__(self, world: AntWorld = None, x=0, y=0, speed=1, homePos=(0,0)):
         self.xPosition = x
         self.yPosition = y
         self.world = world
@@ -55,6 +55,10 @@ class Ant(object):
         self.mode = HOMEPHEROMONE
 
         self.exploreDirection = random.random() * 2 * math.pi
+        self.homePos = homePos
+
+    def setHome(self, homePos):
+        self.homePos = homePos
 
     def setWorld(self, world):
         self.world = world
@@ -122,18 +126,86 @@ class Ant(object):
             strength = 0
             if isFree:
                 i, j = self.world.worldSpaceToPixelSpace(target_x, target_y)
-                strength = self.world.world[i, j, seeking]
-                strength = 1 if strength > 0 else 0
-            return angle * strength
+                sample = np.array(getNeighbors(i, j, 2))
+                strength = np.sum(sample)
+                # strength = self.world.world[i, j, seeking]
+                # strength = 1 if strength > 0 else 0
+            return strength
+        
+        def getNeighbors(row, col, radius):
+            neighbors = []
+            for i in range(max(0, row - radius), min(row + radius + 1, self.world.getWidth())):
+                for j in range(max(0, col - radius), min(col + radius + 1, self.world.getHeight())):
+                    if (i - row) ** 2 + (j - col) ** 2 <= radius ** 2 and (i != row or j != col):
+                        neighbors.append(self.world.world[i, j, PHEROMONE_INDEX[self.seeking()]])
+            return neighbors
 
         vectored = np.vectorize(getTargetPheromone)
-        targets = vectored(targets)
-        result = np.average(targets)
-        # print(result)
-        return result
+        searched = vectored(targets)
+        if np.max(searched) == 0:
+            return angle
+        else:
+            return targets[np.argmax(searched)]
+
+        # result = targets[np.argmax(searched)]
+        # print(result, targets)
+        # return result
+    
+    def getAngleToHome(self):
+        x_manhat = self.xPosition - self.homePos[0]
+        y_manhat = self.yPosition - self.homePos[1]
+        # if x_manhat == 0 or y_manhat == 0 else math.atan(x_manhat / y_manhat)
+        return math.atan(y_manhat/x_manhat)
+
+    def pheromonepathfinding(self, delta_t):
+
+        '''
+        When searching for food:
+        When no pheromone present, move with a random wiggle
+                
+        When returning home:
+        Get the vector from the current position and home position
+        move in that straight line
+
+
+        In general: 
+        When hit a wall, bounce off
+
+        Finding Pheromones
+        Sample three areas around the ant: left, right, and forward
+        If a sample is found, follow that sample
+
+        '''
+        # Finding food, remember means we are placing down home pheromones
+        if self.mode == HOMEPHEROMONE:
+            self.randomExplore(delta_t)
+        elif self.mode == FOODPHEROMONE:
+            # self.randomExplore(delta_t)
+            # if not self.move(self.getAngleToHome(), self.antSpeed * delta_t):
+            #     print("Stuck")
+            # if can't move, turn around and wander in a direction
+            # self.exploreDirection = self.getAngleToHome() + math.pi# + np.random.uniform(-1, 1) * ANGLEOFCHANGE
+            # self.xPosition = self.homePos[0]
+            # self.yPosition = self.homePos[1]
+            # self.mode = HOMEPHEROMONE
+
+            # turn around
+            direction = self.sampleNearby(self.exploreDirection, self.antSpeed * delta_t * .05)
+            self.exploreDirection = direction
+
+            if not self.move(direction, self.antSpeed * delta_t):
+                # if can't move, turn around and wander in a direction
+                self.exploreDirection = direction + math.pi + np.random.uniform(-1, 1) * ANGLEOFCHANGE
+        else:
+            raise RuntimeError("What")
+        
+        # self.move()
+
+        return
 
     def randomExplore(self, delta_t):
         direction_adj = np.random.uniform(-1, 1) * ANGLEOFCHANGE
+        direction_adj = 0
         direction_sampled = self.sampleNearby(self.exploreDirection, self.antSpeed * delta_t * .05)
         direction = self.exploreDirection + direction_adj + direction_sampled
 
@@ -141,10 +213,12 @@ class Ant(object):
             # if can't move, turn around and wander in a direction
             self.exploreDirection = direction + math.pi + np.random.uniform(-1, 1) * ANGLEOFCHANGE
 
+
     def runOnce(self, delta_t):
         """
         Run ant simulation one timestep
         :param delta_t: length of timestep
         """
 
-        self.randomExplore(delta_t)
+        # self.randomExplore(delta_t)
+        self.pheromonepathfinding(delta_t)
