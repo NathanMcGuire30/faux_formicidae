@@ -3,7 +3,7 @@ import cv2
 import pygame
 
 from simulation import Simulation
-from celldata import WALL, ENTITY_COLOR
+from world import WALL
 
 
 class Renderer(object):

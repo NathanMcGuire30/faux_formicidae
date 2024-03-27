@@ -45,5 +45,34 @@ def main():
     renderer.quit()
 
 
+def pathFindTest():
+    world = AntWorld(WIDTH_SCALE, HEIGHT_SCALE, RESOLUTION)
+    sim = Simulation(world)
+    renderer = Renderer(sim)
+
+    ant_1 = Ant()
+    ant_1.exploreDirection = 0
+    print(ant_1.mode)
+
+    sim.addAnt(ant_1, X_Start, 10)
+
+    dt = 0.05
+
+    while renderer.running():
+        # a = time.time()
+
+        # Step the sim once
+        sim.runOnce(dt)
+
+        # Render
+        renderer.render()
+
+        # time.sleep(0.01)
+
+        # print(time.time() - a)
+
+    renderer.quit()
+
+
 if __name__ == '__main__':
-    main()
+    pathFindTest()

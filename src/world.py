@@ -5,12 +5,23 @@ Class to represent the world
 """
 
 import numpy as np
+from enum import IntEnum
 from skimage.draw import line
 
-from celldata import WALL, EMPTY, HOMEPHEROMONE, FOODPHEROMONE, FOODOBJECT, CellData
+# Possible states for world cells
+EMPTY = 0
+WALL = 1
+FOOD = 2
 
-NUM_PHEROMONES = 2
-PHEROMONE_INDEX = {HOMEPHEROMONE: 1, FOODPHEROMONE: 2}
+
+# Pheromone options
+class Pheromones(IntEnum):
+    HOME = 1
+    FOOD = 2
+
+
+NUM_PHEROMONES = Pheromones.__len__()
+print(NUM_PHEROMONES)
 
 
 class AntWorld(object):
@@ -29,14 +40,15 @@ class AntWorld(object):
         # Question, how to implement pheromones.  Do we make a new array, or do we add more values to this one?
         # If multiple types of pheromones can occupy the same cell we'll probably need multiple arrays
         self.world = np.zeros((self.widthCells, self.heightCells, NUM_PHEROMONES + 1))
-        self.world[:, :, 0] += EMPTY
+        self.world[:, :, 0] = EMPTY
+
         # Hard-code a few obstacles for now
         # 640, 380 for now 
-        self.world[400:500, 100:150, 0] = self.world[400:500, 100:150, 0] * WALL / EMPTY
-        # self.world[100:300, 200:300, 0] = self.world[100:300, 200:300, 0] * WALL / EMPTY
-        # self.world[100:300, 0:100, 0] = self.world[100:300, 0:100, 0] * WALL / EMPTY
-        self.world[0:50, 0:50, 0] = self.world[0:50, 0:50, 0] * FOODOBJECT / EMPTY
-        self.world[590:640, 330:380, 0] = self.world[590:640, 330:380, 0] * FOODOBJECT / EMPTY
+        self.world[400:500, 100:150, 0] = WALL
+        # self.world[100:300, 200:300, 0] = WALL
+        # self.world[100:300, 0:100, 0] = WALL
+        self.world[0:50, 0:50, 0] = WALL
+        self.world[590:640, 330:380, 0] = FOOD
 
     def getWidth(self):
         return self.widthCells
@@ -90,11 +102,11 @@ class AntWorld(object):
         discrete_line = list(zip(*line(s_i, s_j, e_i, e_j)))
 
         for point in discrete_line:
-            self.world[point[0], point[1], PHEROMONE_INDEX[pheromone]] = amount
+            self.world[point[0], point[1], int(pheromone)] = amount
 
         pass
 
-    def determinePheromoneStrenght(self, x: int, y: int, pheromone: int, step: float = -0.1):
+    def determinePheromoneStrength(self, x: int, y: int, pheromone: int, step: float = -0.1):
         """
         Convert the timestamp of the pheromone at the given location to a strength metric
         """
@@ -113,6 +125,5 @@ class AntWorld(object):
 
         evaporate_step = 0.1 * delta_t
 
-        threshold = 0
-        for pheromone in PHEROMONE_INDEX.keys():
-            np.clip((self.world[:, :, PHEROMONE_INDEX[pheromone]] - evaporate_step), threshold, None, self.world[:, :, PHEROMONE_INDEX[pheromone]])
+        for pheromone in Pheromones:
+            np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
