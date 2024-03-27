@@ -21,7 +21,6 @@ class Pheromones(IntEnum):
 
 
 NUM_PHEROMONES = Pheromones.__len__()
-print(NUM_PHEROMONES)
 
 
 class AntWorld(object):
@@ -86,7 +85,7 @@ class AntWorld(object):
     # decimal number is the strength of the pheromone [0,1)
     def changePheromone(self, x: float, y: float, pheromone: int, amnt: float = 1.0):
         i, j = self.worldSpaceToPixelSpace(x, y)
-        self.world[i, j, PHEROMONE_INDEX[pheromone]] = amnt
+        self.world[i, j, int(pheromone)] = amnt
         return
 
     def addPheromone(self, x: int, y: int, pheromone: int, amnt: float = 1.0):
@@ -106,11 +105,19 @@ class AntWorld(object):
 
         pass
 
-    def determinePheromoneStrength(self, x: int, y: int, pheromone: int, step: float = -0.1):
-        """
-        Convert the timestamp of the pheromone at the given location to a strength metric
-        """
-        return self.changePheromone(x, y, pheromone, step)
+    def sampleArea(self, x, y, radius, layer):
+        start_x = x - radius
+        end_x = x + radius
+        start_y = y - radius
+        end_y = y + radius
+
+        [start_i, start_j] = self.worldSpaceToPixelSpace(start_x, start_y)
+        [end_i, end_j] = self.worldSpaceToPixelSpace(end_x, end_y)
+
+        return self.getLayerSection(start_i, end_i, start_j, end_j, int(layer))
+
+    def getLayerSection(self, start_i, end_i, start_j, end_j, layer):
+        return self.world[start_i:end_i, start_j:end_j, int(layer)]
 
     def getLayer(self, layer_id: int):
         return self.world[:, :, layer_id]
@@ -126,4 +133,4 @@ class AntWorld(object):
         evaporate_step = 0.1 * delta_t
 
         for pheromone in Pheromones:
-            np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
+            np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1000.0, self.world[:, :, int(pheromone)])

@@ -45,16 +45,6 @@ class Ant(object):
     def getPositionPixelSpace(self):
         return self.world.worldSpaceToPixelSpace(self.xPosition, self.yPosition)
 
-    def radDirectionToGridDirection(self, angle_rad):
-        normalized = angle_rad % (2 * math.pi)
-        # make 8 sectors
-        sectors = 2 * math.pi / 8
-        # shift the sectors by one half a sector
-        offset = sectors / 2
-
-        index = int(normalized + offset // sectors)
-        return EXPLORE_DIRECTIONS[index]
-
     def move(self, angle, distance):
         new_x = self.xPosition + math.cos(angle) * distance
         new_y = self.yPosition + math.sin(angle) * distance
@@ -70,7 +60,24 @@ class Ant(object):
         else:
             return False
 
-    def pheromonepathfinding(self, delta_t):
+    def getDirectionAlongPheromone(self, pheromone):
+        visible_area = self.world.sampleArea(self.xPosition, self.yPosition, 0.1, pheromone)
+        non_zero_values = visible_area[np.nonzero(visible_area)]
+
+        # If we can see a pheromone
+        if len(non_zero_values) > 0:
+            visible_area = visible_area.T
+            min_val = np.min(non_zero_values)
+            min_location = np.where(visible_area == min_val)
+            min_location = np.asarray([float(min_location[0][0]), float(min_location[1][0])])
+            ant_location = np.asarray(visible_area.shape) / 2.0
+
+            v = ant_location - min_location
+            return math.atan2(v[0], v[1]) - math.pi
+        else:
+            return None
+
+    def pheromonePathFinding(self, delta_t):
         """
         When searching for food:
         When no pheromone present, move with a random wiggle
@@ -93,15 +100,21 @@ class Ant(object):
             self.randomExplore(delta_t)
             self.activePheromone = Pheromones.HOME
         elif self.mode == AntMode.GO_HOME:
-            pass
+            direction = self.getDirectionAlongPheromone(Pheromones.HOME)
+
+            # If we can see a pheromone
+            if direction is not None:
+                self.move(direction, self.antSpeed * delta_t)
+            else:
+                self.randomExplore(delta_t)
         else:
             raise RuntimeError("What")
 
         return
 
     def randomExplore(self, delta_t):
-        direction_adj = np.random.uniform(-0.05, 0.05)
-        direction_adj = 0
+        noise_mag = 0.4
+        direction_adj = np.random.uniform(-noise_mag, noise_mag)
         direction = self.exploreDirection + direction_adj
 
         if not self.move(direction, self.antSpeed * delta_t):
@@ -115,4 +128,4 @@ class Ant(object):
         """
 
         # self.randomExplore(delta_t)
-        self.pheromonepathfinding(delta_t)
+        self.pheromonePathFinding(delta_t)

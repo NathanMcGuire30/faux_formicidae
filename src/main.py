@@ -4,7 +4,7 @@ import time
 
 from simulation import Simulation
 from world import AntWorld
-from ant import Ant
+from ant import Ant, AntMode
 from renderer import Renderer
 
 WIDTH_SCALE = 16
@@ -51,25 +51,20 @@ def pathFindTest():
     renderer = Renderer(sim)
 
     ant_1 = Ant()
-    ant_1.exploreDirection = 0
-    print(ant_1.mode)
+    ant_1.exploreDirection = 1.57
+
+    ant_2 = Ant()
+    ant_2.exploreDirection = 3.14
+    ant_2.antSpeed = 0.9
+    ant_2.mode = AntMode.GO_HOME
 
     sim.addAnt(ant_1, X_Start, 10)
+    sim.addAnt(ant_2, 600, 200)
 
     dt = 0.05
-
     while renderer.running():
-        # a = time.time()
-
-        # Step the sim once
         sim.runOnce(dt)
-
-        # Render
         renderer.render()
-
-        # time.sleep(0.01)
-
-        # print(time.time() - a)
 
     renderer.quit()
 
