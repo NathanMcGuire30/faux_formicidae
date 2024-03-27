@@ -8,6 +8,7 @@ Contains a world and a list of ant colony classes, manages the updates of each
 
 import typing
 import pygame
+from memory_profiler import profile
 
 from world import AntWorld
 from ant import Ant
@@ -36,6 +37,7 @@ class Simulation(object):
     def getAnts(self):
         return self.ants
 
+    # @profile
     def runOnce(self, delta_t=0.1):
         """
         Function to advance the simulation one time step
@@ -47,5 +49,10 @@ class Simulation(object):
         self.world.runOnce(delta_t)
 
         # Update the ants
-        for ant in self.ants:
+        i = len(self.ants) - 1
+        while i >= 0:
+            ant = self.ants[i]
             ant.runOnce(delta_t)
+            if ant.hunger == 0:
+                self.ants.remove(ant)
+            i -= 1

@@ -9,9 +9,9 @@ from renderer import Renderer
 
 WIDTH_SCALE = 16
 HEIGHT_SCALE = 9
-RESOLUTION = 40
+RESOLUTION = 80
 
-COLONY_START_SIZE = 100
+COLONY_START_SIZE = 1
 
 
 def main():

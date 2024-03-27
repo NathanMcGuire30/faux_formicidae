@@ -52,9 +52,13 @@ class Ant(object):
         self.antSpeed = speed  # cm/s
 
         # what pheromone am I laying down
-        self.mode = HOMEPHEROMONE
+        self.mode = FOODPHEROMONE
+        self.exploring = True
 
         self.exploreDirection = random.random() * 2 * math.pi
+
+        self.max_hunger = np.random.randint(100, 1000)
+        self.hunger = self.max_hunger
 
     def setWorld(self, world):
         self.world = world
@@ -84,12 +88,18 @@ class Ant(object):
         return FOODPHEROMONE if self.mode == HOMEPHEROMONE else HOMEPHEROMONE
 
     def move(self, angle, distance):
+        self.hunger -= 1
+        if self.hunger < 7*self.max_hunger/8:
+            self.exploring = False
+            self.mode = HOMEPHEROMONE
+        # TODO: Make the ant return (will wait till we have that working)
         new_x = self.xPosition + math.cos(angle) * distance
         new_y = self.yPosition + math.sin(angle) * distance
         isFree, objType = self.world.isFreePosition(new_x, new_y)
 
         if isFree:
-            self.world.addPheromoneLine((self.xPosition, self.yPosition), (new_x, new_y), self.mode)
+            if self.exploring:
+                self.world.addPheromoneLine((self.xPosition, self.yPosition), (new_x, new_y), self.mode)
 
             self.xPosition = new_x
             self.yPosition = new_y
@@ -146,5 +156,49 @@ class Ant(object):
         Run ant simulation one timestep
         :param delta_t: length of timestep
         """
+        if self.exploring:
+            self.randomExplore(delta_t)
+        else:
+            curr_x, curr_y = self.world.worldSpaceToPixelSpace(self.xPosition, self.yPosition)
+            best_direction = {} # Initialize best direction
+            for i in range(21):
+                for j in range(21):
+                    # Check 5x5 grid around ant for pheromones
+                    target_x, target_y = (curr_x + i - 10, curr_y + j - 10)
+                    x_pixel, y_pixel = self.world.pixelSpaceToWorldSpace(target_x, target_y)
 
-        self.randomExplore(delta_t)
+                    # Check if the position is free and has a home pheromone
+                    if not (0 <= target_x < self.world.world.shape[0] and 0 <= target_y < self.world.world.shape[1]):
+                        continue
+                    if self.world.isFreePosition(x_pixel, y_pixel):
+                        food_pheromone_intensity = self.world.world[target_x, target_y, PHEROMONE_INDEX[FOODPHEROMONE]]
+                        if food_pheromone_intensity > 0:
+                            # Update best direction if food pheromone is stronger
+                            best_direction[food_pheromone_intensity] = i, j
+
+            if not len(best_direction) == 0:
+                # Calculate the delta between ant's position and target position
+                print(best_direction)
+                items = sorted(best_direction)
+                print(items)
+                i = 0
+                while i < len(items):
+                    temp_x, temp_y = best_direction[items[i]][0], best_direction[items[i]][1]
+                    target_x, target_y = self.world.pixelSpaceToWorldSpace(curr_x + temp_x, curr_y + temp_y)
+                    dx = self.xPosition - target_x
+                    dy = self.yPosition - target_y
+
+                    distance = np.linalg.norm(np.array([dy, dx]))
+
+                    # Calculate the direction to move towards
+                    explore_direction = math.atan2(dy, dx) + math.pi
+                    # Move towards the direction
+                    if not self.move(explore_direction, self.antSpeed * delta_t/6):
+                        # if can't move, turn around and wander in a direction
+                        print("not")
+                        pass
+                    else:
+                        print('moved')
+                        break
+                        pass
+                    i += 1
