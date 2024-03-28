@@ -8,10 +8,12 @@ import numpy as np
 from enum import IntEnum
 from skimage.draw import line
 
+
 # Possible states for world cells
-EMPTY = 0
-WALL = 1
-FOOD = 2
+class WorldCell(IntEnum):
+    EMPTY = 0
+    WALL = 1
+    FOOD = 2
 
 
 # Pheromone options
@@ -39,15 +41,15 @@ class AntWorld(object):
         # Question, how to implement pheromones.  Do we make a new array, or do we add more values to this one?
         # If multiple types of pheromones can occupy the same cell we'll probably need multiple arrays
         self.world = np.zeros((self.widthCells, self.heightCells, NUM_PHEROMONES + 1))
-        self.world[:, :, 0] = EMPTY
+        self.world[:, :, 0] = WorldCell.EMPTY
 
         # Hard-code a few obstacles for now
         # 640, 380 for now 
-        self.world[400:500, 100:150, 0] = WALL
+        self.world[400:500, 100:150, 0] = WorldCell.WALL
         # self.world[100:300, 200:300, 0] = WALL
         # self.world[100:300, 0:100, 0] = WALL
-        self.world[0:50, 0:50, 0] = WALL
-        self.world[590:640, 330:380, 0] = FOOD
+        self.world[0:50, 0:50, 0] = WorldCell.WALL
+        self.world[590:640, 330:380, 0] = WorldCell.FOOD
 
     def getWidth(self):
         return self.widthCells
@@ -78,7 +80,7 @@ class AntWorld(object):
         """
 
         i, j = self.worldSpaceToPixelSpace(x, y)
-        return self.isWithinBounds(i, j) and self.world[i][j][0] == EMPTY, self.world[i][j][0] if self.isWithinBounds(i, j) else None
+        return self.isWithinBounds(i, j) and self.world[i][j][0] == WorldCell.EMPTY, int(self.world[i][j][0]) if self.isWithinBounds(i, j) else None
 
     # Pheromone as a float
     # whole numbers is amount of time since epoch the last pheromone was updated
@@ -105,7 +107,7 @@ class AntWorld(object):
 
         pass
 
-    def sampleArea(self, x, y, radius, layer):
+    def sampleArea(self, x, y, radius):
         start_x = x - radius
         end_x = x + radius
         start_y = y - radius
@@ -114,10 +116,10 @@ class AntWorld(object):
         [start_i, start_j] = self.worldSpaceToPixelSpace(start_x, start_y)
         [end_i, end_j] = self.worldSpaceToPixelSpace(end_x, end_y)
 
-        return self.getLayerSection(start_i, end_i, start_j, end_j, int(layer))
+        return self.getLayerSection(start_i, end_i, start_j, end_j)
 
-    def getLayerSection(self, start_i, end_i, start_j, end_j, layer):
-        return self.world[start_i:end_i, start_j:end_j, int(layer)]
+    def getLayerSection(self, start_i, end_i, start_j, end_j):
+        return self.world[start_i:end_i, start_j:end_j, :]
 
     def getLayer(self, layer_id: int):
         return self.world[:, :, layer_id]
@@ -130,7 +132,7 @@ class AntWorld(object):
         :param delta_t: timestep in seconds
         """
 
-        evaporate_step = 0.1 * delta_t
+        evaporate_step = 0.05 * delta_t
 
         for pheromone in Pheromones:
-            np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1000.0, self.world[:, :, int(pheromone)])
+            np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])

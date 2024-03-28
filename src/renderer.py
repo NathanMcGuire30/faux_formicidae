@@ -3,7 +3,7 @@ import cv2
 import pygame
 
 from simulation import Simulation
-from world import WALL
+from world import WorldCell
 
 
 class Renderer(object):
@@ -53,7 +53,7 @@ class Renderer(object):
 
     def renderWorld(self):
         obstacles = self.sim.getWorld().getLayer(0).astype(np.uint8).T
-        obstacles = (WALL - obstacles) * 255
+        obstacles = (WorldCell.WALL - obstacles) * 255
 
         obstacles_img = cv2.cvtColor(obstacles, cv2.COLOR_GRAY2BGR)
 

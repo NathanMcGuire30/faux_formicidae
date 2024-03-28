@@ -11,7 +11,7 @@ WIDTH_SCALE = 16
 HEIGHT_SCALE = 9
 RESOLUTION = 40
 
-COLONY_START_SIZE = 100
+COLONY_START_SIZE = 30
 
 X_Start = 320
 Y_Start = 180
@@ -51,15 +51,9 @@ def pathFindTest():
     renderer = Renderer(sim)
 
     ant_1 = Ant()
-    ant_1.exploreDirection = 1.57
+    ant_1.exploreDirection = 0.5
 
-    ant_2 = Ant()
-    ant_2.exploreDirection = 3.14
-    ant_2.antSpeed = 0.9
-    ant_2.mode = AntMode.GO_HOME
-
-    sim.addAnt(ant_1, X_Start, 10)
-    sim.addAnt(ant_2, 600, 200)
+    sim.addAnt(ant_1, X_Start, Y_Start)
 
     dt = 0.05
     while renderer.running():
@@ -70,4 +64,4 @@ def pathFindTest():
 
 
 if __name__ == '__main__':
-    pathFindTest()
+    main()

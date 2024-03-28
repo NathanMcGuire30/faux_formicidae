@@ -26,6 +26,7 @@ class Simulation(object):
             self.ants.append(ant)
             ant.setWorld(self.world)
             ant.setPosition(x, y)
+            ant.setHomePosition(x, y)
         else:
             pass
             # TODO: This really shouldn't happen, but we should probably do something here
