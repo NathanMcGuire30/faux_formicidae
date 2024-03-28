@@ -25,9 +25,9 @@ def angle_diff_radians(a, b):
     logic from https://bitbucket.org/whoidsl/ds_base/src/master/ds_util/src/ds_>
     """
 
-    dot = math.sin(a) * math.sin(b) + math.cos(a) * math.cos(b)
-    cross = math.cos(a) * math.sin(b) - math.sin(a) * math.cos(b)
-    diff = math.atan2(cross, dot)
+    dot = np.sin(a) * np.sin(b) + np.cos(a) * np.cos(b)
+    cross = np.cos(a) * np.sin(b) - np.sin(a) * np.cos(b)
+    diff = np.arctan2(cross, dot)
 
     return diff
 
@@ -44,6 +44,7 @@ class Ant(object):
         # Mode tracking variables
         self.mode = AntMode.EXPLORE
         self.activePheromone = None
+        self.currentTrail = None
 
         self.exploreDirection = random.random() * 2 * math.pi
 
@@ -78,24 +79,45 @@ class Ant(object):
 
             self.xPosition = new_x
             self.yPosition = new_y
+        else:
+            self.exploreDirection += math.pi + np.random.uniform(-1, 1)
 
         return obstacle_type
 
     def getDirectionAlongPheromone(self, fov: np.ndarray, pheromone):
-        visible_area = fov[:, :, int(pheromone)].copy()
-        non_zero_values = visible_area[np.nonzero(visible_area)]
+        use_gradient = pheromone != self.currentTrail
 
-        # If we can see a pheromone
-        if len(non_zero_values) > 0:
-            visible_area = visible_area.T
-            min_val = np.min(non_zero_values)
-            min_location = np.where(visible_area == min_val)
-            min_location = np.asarray([float(min_location[0][0]), float(min_location[1][0])])
-            ant_location = np.asarray(visible_area.shape) / 2.0
+        visible_area = fov[:, :, int(pheromone)].copy().T
+        non_zero_locations = np.nonzero(visible_area)
+        non_zero_values = visible_area[non_zero_locations]
+        non_zero_locations = np.asarray(non_zero_locations)
 
-            v = ant_location - min_location
-            return math.atan2(v[0], v[1]) - math.pi
+        ant_location = np.asarray(visible_area.shape) / 2.0
+
+        if min(non_zero_locations.shape) > 0:
+            r = np.linalg.norm(non_zero_locations, axis=0)
+            r = r * math.pi / ant_location[0]
+
+            v = (ant_location - non_zero_locations.T).T
+            theta = np.arctan2(v[0, :], v[1, :]) - np.pi
+            diff = abs(angle_diff_radians(theta, self.exploreDirection - math.pi))
+
+            # Trying to detect bends in the trail
+            # max_diff = np.max(diff)
+            # use_gradient = use_gradient or max_diff < 2.5
+
+            if use_gradient:
+                weights = 1.0 / non_zero_values
+            else:
+                weights = diff * (1.0 / non_zero_values)
+
+            i = np.argmax(weights)
+            direction = theta[i]
+
+            self.currentTrail = pheromone
+            return direction
         else:
+            self.currentTrail = None
             return None
 
     def worldObjectVisible(self, fov: np.ndarray, object_type):
@@ -121,7 +143,7 @@ class Ant(object):
         If a sample is found, follow that sample
         """
 
-        visible_area = self.world.sampleArea(self.xPosition, self.yPosition, 0.1)
+        visible_area = self.world.sampleArea(self.xPosition, self.yPosition, 0.15)
         world_layer = visible_area[:, :, 0]
 
         # Finding food, remember means we are placing down home pheromones
@@ -140,6 +162,7 @@ class Ant(object):
             if can_see_food or obstacle_type == int(WorldCell.FOOD):
                 self.mode = AntMode.GO_HOME
                 self.activePheromone = Pheromones.FOOD
+                self.exploreDirection += math.pi
             else:
                 self.activePheromone = Pheromones.HOME
         elif self.mode == AntMode.GO_HOME:
@@ -147,6 +170,7 @@ class Ant(object):
 
             if self.distanceToHome() < 0.1:
                 self.mode = AntMode.EXPLORE
+                self.exploreDirection += math.pi
             elif direction is not None:
                 self.move(direction, self.antSpeed * delta_t)
                 self.exploreDirection = direction
@@ -164,7 +188,7 @@ class Ant(object):
 
         if obstacle_type != 0:
             # if can't move, turn around and wander in a direction
-            self.exploreDirection = direction + math.pi + np.random.uniform(-1.5, 1.5)
+            self.exploreDirection += np.random.uniform(-1.5, 1.5)
 
         return obstacle_type
 
