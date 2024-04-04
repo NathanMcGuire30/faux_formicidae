@@ -7,8 +7,9 @@ from world import WorldCell
 
 
 class Renderer(object):
-    def __init__(self, sim: Simulation):
+    def __init__(self, sim: Simulation, nestLoc):
         self.sim = sim
+        self.nestLoc = nestLoc
 
         self.width = self.sim.getWorld().widthCells
         self.height = self.sim.getWorld().heightCells
@@ -41,6 +42,8 @@ class Renderer(object):
         self.renderPheromoneFast(2, (0, 100, 0))
 
         self.renderAnts()
+
+        self.renderNest()
 
         # flip() the display to put your work on screen
         pygame.display.flip()
@@ -76,3 +79,5 @@ class Renderer(object):
     def renderAnts(self):
         for ant in self.sim.getAnts():
             pygame.draw.circle(self.screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 2)
+    def renderNest(self):
+        pygame.draw.circle(self.screen, pygame.Color('orange'), self.nestLoc, 2)

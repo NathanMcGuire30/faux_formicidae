@@ -21,11 +21,11 @@ def main():
     world = AntWorld(WIDTH_SCALE, HEIGHT_SCALE, RESOLUTION)
 
     sim = Simulation(world)
-    renderer = Renderer(sim)
+    renderer = Renderer(sim, (X_Start, Y_Start))
 
     # Add ants
     for _ in range(COLONY_START_SIZE):
-        sim.addAnt(Ant(), X_Start, Y_Start)
+        sim.addAnt(Ant(x=X_Start, y=Y_Start), X_Start, Y_Start)
 
     dt = 0.05
 

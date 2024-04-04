@@ -37,7 +37,7 @@ class Ant(object):
         self.xPosition = x
         self.yPosition = y
         self.world = world
-        self.homePosition = [x, y]
+        self.homePosition = (x, y)
 
         self.antSpeed = speed  # cm/s
 
@@ -45,6 +45,14 @@ class Ant(object):
         self.mode = AntMode.EXPLORE
         self.activePheromone = None
         self.currentTrail = None
+
+        # Temper is how far the ant is willing to continue on a dead trail to find food
+        # Hope is how far the ant is willing to continue on a dead trail to find home
+        self.temper = -1
+        self.hope = -1
+
+        self.temperInc= 5
+        self.hopeInc = 5
 
         self.exploreDirection = random.random() * 2 * math.pi
 
@@ -83,6 +91,13 @@ class Ant(object):
             self.exploreDirection += math.pi + np.random.uniform(-1, 1)
 
         return obstacle_type
+    
+    def getDirectionToNest(self):
+        x_diff = self.xPosition - self.homePosition[0]
+        y_diff = self.yPosition - self.homePosition[1]
+        angle = -1* (math.pi - math.atan2(y_diff, x_diff))
+        
+        return angle
 
     def getDirectionAlongPheromone(self, fov: np.ndarray, pheromone):
         use_gradient = pheromone != self.currentTrail
@@ -142,7 +157,7 @@ class Ant(object):
         Sample three areas around the ant: left, right, and forward
         If a sample is found, follow that sample
         """
-
+        DROPOFF_DISTANCE = .5
         visible_area = self.world.sampleArea(self.xPosition, self.yPosition, 0.15)
         world_layer = visible_area[:, :, 0]
 
@@ -155,7 +170,16 @@ class Ant(object):
             if direction is not None:
                 obstacle_type = self.move(direction, self.antSpeed * delta_t)
                 self.exploreDirection = direction
+                # if we don't find the right direction, keep trying
+                # add to our hope count, larger hopeInc is, faster lose hope
+                self.hope += self.hopeInc
+            # if still have hope just keep going
+            elif 0 < self.hope < 100:
+                obstacle_type = self.move(self.exploreDirection, self.antSpeed * delta_t)
+                print("Hopefull")
             else:
+                # can't find phero and no hope left
+                self.hope = -1
                 obstacle_type = self.randomExplore(delta_t)
 
             # If we found food we start going home
@@ -167,20 +191,27 @@ class Ant(object):
                 self.activePheromone = Pheromones.HOME
         elif self.mode == AntMode.GO_HOME:
             direction = self.getDirectionAlongPheromone(visible_area, Pheromones.HOME)
+            # direction = self.getDirectionToNest()
 
-            if self.distanceToHome() < 0.1:
+            if self.distanceToHome() < DROPOFF_DISTANCE:
                 self.mode = AntMode.EXPLORE
                 self.exploreDirection += math.pi
+                self.world.foodRecieved()
             elif direction is not None:
+                # direction = self.getDirectionToNest()
                 self.move(direction, self.antSpeed * delta_t)
                 self.exploreDirection = direction
+                self.temper += self.temperInc
+            elif 0 < self.temper < 100:
+                self.move(self.exploreDirection, self.antSpeed * delta_t)
             else:
+                self.temper = -1
                 self.randomExplore(delta_t)
         else:
             raise RuntimeError("What")
 
     def randomExplore(self, delta_t):
-        noise_mag = 0.4
+        noise_mag = math.pi / 4
         direction_adj = np.random.uniform(-noise_mag, noise_mag)
         direction = self.exploreDirection + direction_adj
 

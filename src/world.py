@@ -7,6 +7,7 @@ Class to represent the world
 import numpy as np
 from enum import IntEnum
 from skimage.draw import line
+import cv2
 
 
 # Possible states for world cells
@@ -48,8 +49,11 @@ class AntWorld(object):
         self.world[400:500, 100:150, 0] = WorldCell.WALL
         # self.world[100:300, 200:300, 0] = WALL
         # self.world[100:300, 0:100, 0] = WALL
-        self.world[0:50, 0:50, 0] = WorldCell.WALL
+        self.world[0:50, 0:50, 0] = WorldCell.FOOD
         self.world[590:640, 330:380, 0] = WorldCell.FOOD
+
+        self.timeSince = 0
+        self.food = 0
 
     def getWidth(self):
         return self.widthCells
@@ -133,6 +137,14 @@ class AntWorld(object):
         """
 
         evaporate_step = 0.05 * delta_t
-
+        self.timeSince += delta_t
         for pheromone in Pheromones:
             np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
+            if self.timeSince > 10:
+                self.world[:, :, int(pheromone)] = cv2.blur(self.world[:, :, int(pheromone)], (3, 3))
+                self.timeSince = 0
+                print("Blur")
+
+    def foodRecieved(self):
+        self.food += 1
+        print("Delivered",self.food)
