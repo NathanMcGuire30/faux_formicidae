@@ -10,12 +10,6 @@ def run():
     g.generateRandomColonies()
     g.runBatch()
     g.generateColoniesFromSimResults()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
 
 
 if __name__ == '__main__':

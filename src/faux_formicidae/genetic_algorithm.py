@@ -113,16 +113,43 @@ class GeneticAlgorithm(object):
             renderer = Renderer(sim)
 
         population = 0
+        last_population = 0
+        next_population_check_time = 10
+        population_constant_for = 0
 
         dt = 0.05
-        for i in range(100):
+        max_run_time = 10000
+        for i in range(max_run_time):
             sim.runOnce(dt)
 
             if self.enableRenderer:
                 renderer.render()
 
-            # TODO: Run until population is stabilized for some amount of time
-            population = int(len(sim.ants))
+            # TODO: This will trigger
+            if sim.clock >= next_population_check_time:
+                population = int(len(sim.ants))
+
+                # Calculate percent diff
+                if population + last_population == 0:
+                    percent_diff = 0
+                else:
+                    percent_diff = abs(population - last_population) / ((population + last_population) / 2)
+
+                # If it hasn't changed, start counting
+                if abs(percent_diff) < 0.05:
+                    population_constant_for += 1
+                else:
+                    population_constant_for = 0
+
+                # If it hasn't changed for 10 seconds, we're done
+                if population_constant_for > 10:
+                    # print(f"Population leveled off after {sim.clock} seconds")
+                    break
+
+                last_population = population
+
+        if i == max_run_time - 1:
+            print("Hit runtime limit before population stabilized")
 
         if self.enableRenderer:
             renderer.quit()
