@@ -4,6 +4,8 @@ Class to manage the spawning of ants
 Contains the actual parameters that are managed by the genetic algorithm, since all ants are the same
 """
 
+import numpy
+
 from dataclasses import dataclass
 
 from faux_formicidae.ant import Ant
@@ -20,6 +22,9 @@ class ColonyParameters(object):
 
     def getAsList(self):
         return list(self.__dict__.values())
+
+    def getAsNumpy(self):
+        return numpy.asarray(self.getAsList())
 
 
 class AntColony(object):
