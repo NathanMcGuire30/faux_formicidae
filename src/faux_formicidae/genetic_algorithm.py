@@ -133,7 +133,7 @@ class GeneticAlgorithm(object):
             if self.enableRenderer:
                 renderer.render()
 
-            # TODO: This will trigger
+            # TODO: Make sure we don't get weird false positives here
             if sim.clock >= next_population_check_time:
                 population = int(len(sim.ants))
 
