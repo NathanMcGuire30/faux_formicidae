@@ -26,6 +26,16 @@ class ColonyParameters(object):
     def getAsNumpy(self):
         return numpy.asarray(self.getAsList())
 
+    def floatDict(self):
+        """
+        YAML has issues if the values are numpy data types
+        """
+
+        data_dict = self.__dict__
+        for key in data_dict:
+            data_dict[key] = float(data_dict[key])
+        return data_dict
+
 
 class AntColony(object):
     def __init__(self, x, y, params: ColonyParameters):

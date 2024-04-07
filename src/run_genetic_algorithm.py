@@ -6,10 +6,12 @@ from faux_formicidae.genetic_algorithm import GeneticAlgorithm
 
 
 def run():
+    # Runs and saves one iteration
     g = GeneticAlgorithm()
-    g.generateRandomColonies()
+    g.loadColonyParameters()
     g.runBatch()
     g.generateColoniesFromSimResults()
+    g.saveColonyParameters()
 
 
 if __name__ == '__main__':

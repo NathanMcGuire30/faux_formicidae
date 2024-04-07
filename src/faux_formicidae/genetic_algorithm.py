@@ -2,6 +2,8 @@
 Class to actually run the genetic algorithm
 """
 
+import os
+import yaml
 import numpy
 import heapq
 import random
@@ -18,11 +20,15 @@ from faux_formicidae.ant_colony import AntColony, ColonyParameters
 MINIMUM = ColonyParameters(0, 0.1, 0)
 MAXIMUM = ColonyParameters(1, 1, 10)
 
+PATH = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..", ".."))
+
 
 class GeneticAlgorithm(object):
     def __init__(self, enable_renderer=False, batch_size=20):
         self.enableRenderer = enable_renderer
         self.batchSize = batch_size
+
+        self.defaultSaveFile = os.path.join(PATH, "data", "best_ants.yaml")
 
         self.simResults = []
         self.colonyParameters: List[ColonyParameters] = []
@@ -71,6 +77,7 @@ class GeneticAlgorithm(object):
         num_to_crossover = num_to_make - num_to_mutate
 
         # Make some mutations
+        # TODO: Enforce limits on new parameters
         for i in range(num_to_mutate):
             base = random.choice(kept_sim_results)
             params = base.getAsNumpy()
@@ -78,6 +85,7 @@ class GeneticAlgorithm(object):
             param_object = ColonyParameters(*params)
             self.colonyParameters.append(param_object)
 
+        # Make some crossovers
         for i in range(num_to_crossover):
             parents = random.sample(kept_sim_results, 2)
             parents = [i.getAsList() for i in parents]
@@ -155,3 +163,31 @@ class GeneticAlgorithm(object):
             renderer.quit()
 
         heapq.heappush(self.simResults, (population, index, colony_params))  # Use index to break ties
+
+    def saveColonyParameters(self, path=None):
+        if path is None:
+            path = self.defaultSaveFile
+
+        # TODO: Add hyperparameters
+        data_dict = {"ants": [i.floatDict() for i in self.colonyParameters],
+                     }
+
+        file = open(path, 'w')
+        yaml.dump(data_dict, file)
+        file.close()
+
+    def loadColonyParameters(self, path=None):
+        if path is None:
+            path = self.defaultSaveFile
+
+        file = open(path)
+        data = yaml.safe_load(file)
+        file.close()
+
+        # Read in ant data
+        ants = data["ants"]
+        self.colonyParameters = []
+        for ant in ants:
+            parameter_object = ColonyParameters(**ant)
+            self.colonyParameters.append(parameter_object)
+        self.batchSize = len(self.colonyParameters)
