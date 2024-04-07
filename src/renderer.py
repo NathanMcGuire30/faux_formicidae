@@ -79,5 +79,6 @@ class Renderer(object):
     def renderAnts(self):
         for ant in self.sim.getAnts():
             pygame.draw.circle(self.screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 2)
+
     def renderNest(self):
         pygame.draw.circle(self.screen, pygame.Color('orange'), self.nestLoc, 2)

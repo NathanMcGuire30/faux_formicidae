@@ -51,7 +51,7 @@ class Ant(object):
         self.temper = -1
         self.hope = -1
 
-        self.temperInc= 5
+        self.temperInc = 5
         self.hopeInc = 5
 
         self.exploreDirection = random.random() * 2 * math.pi
@@ -91,12 +91,12 @@ class Ant(object):
             self.exploreDirection += math.pi + np.random.uniform(-1, 1)
 
         return obstacle_type
-    
+
     def getDirectionToNest(self):
         x_diff = self.xPosition - self.homePosition[0]
         y_diff = self.yPosition - self.homePosition[1]
-        angle = -1* (math.pi - math.atan2(y_diff, x_diff))
-        
+        angle = -1 * (math.pi - math.atan2(y_diff, x_diff))
+
         return angle
 
     def getDirectionAlongPheromone(self, fov: np.ndarray, pheromone):

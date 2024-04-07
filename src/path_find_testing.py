@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+import time
 
 from simulation import Simulation
 from world import AntWorld
-from ant_colony import AntColony
+from ant import Ant, AntMode
 from renderer import Renderer
 
 WIDTH_SCALE = 16
@@ -16,17 +17,18 @@ X_Start = 320
 Y_Start = 180
 
 
-def visualizeColony():
+def pathFindTest():
     world = AntWorld(WIDTH_SCALE, HEIGHT_SCALE, RESOLUTION)
-    colony = AntColony(WIDTH_SCALE / 2, HEIGHT_SCALE / 2)
-
     sim = Simulation(world)
-    sim.addAntColony(colony)
     renderer = Renderer(sim, (X_Start, Y_Start))
+
+    ant_1 = Ant()
+    ant_1.exploreDirection = 0.5
+
+    sim.addAnt(ant_1, X_Start, Y_Start)
 
     dt = 0.05
     while renderer.running():
-        colony.runOnce()
         sim.runOnce(dt)
         renderer.render()
 
@@ -34,4 +36,4 @@ def visualizeColony():
 
 
 if __name__ == '__main__':
-    visualizeColony()
+    pathFindTest()

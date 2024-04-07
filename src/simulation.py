@@ -7,9 +7,9 @@ Contains a world and a list of ant colony classes, manages the updates of each
 """
 
 import typing
-import pygame
 
 from world import AntWorld
+from ant_colony import AntColony
 from ant import Ant
 
 
@@ -17,10 +17,14 @@ class Simulation(object):
     def __init__(self, world: AntWorld):
         self.world = world
 
+        self.antColony = None
         self.ants: typing.List[Ant] = []
 
-    def addAnt(self, ant: Ant, i: int, j: int):
-        x, y = self.world.pixelSpaceToWorldSpace(i, j)
+    def addAntColony(self, colony: AntColony):
+        self.antColony = colony
+        self.antColony.setCallback(self.addAnt)
+
+    def addAnt(self, ant: Ant, x: float, y: float):
         isFree, objType = self.world.isFreePosition(x, y)
         if isFree:
             self.ants.append(ant)
