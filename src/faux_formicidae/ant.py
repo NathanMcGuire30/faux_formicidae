@@ -33,7 +33,7 @@ def angle_diff_radians(a, b):
 
 
 class Ant(object):
-    def __init__(self, give_food, world: AntWorld = None, x=0, y=0, speed=1):
+    def __init__(self, give_food, world: AntWorld = None, x=0, y=0, speed=1, size=1):
         self.xPosition = x
         self.yPosition = y
         self.world = world
@@ -41,7 +41,7 @@ class Ant(object):
         self.homePosition = (x, y)
 
         # Energy is how much we have left, stamina is the max
-        self.energy = 1000.0
+        self.energy = 100.0
         self.stamina = 100.0
 
         # How fast we go

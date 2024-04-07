@@ -16,6 +16,7 @@ from faux_formicidae.ant import Ant
 class Simulation(object):
     def __init__(self, world: AntWorld):
         self.world = world
+        self.clock = 0
 
         self.antColony = None
         self.ants: typing.List[Ant] = []
@@ -50,9 +51,15 @@ class Simulation(object):
         # Update the world
         self.world.runOnce(delta_t)
 
+        # Update the colony
+        self.antColony.runOnce(delta_t, self.clock)
+
         # Update the ants
         for ant in self.ants:
             ant.runOnce(delta_t)
 
-            if ant.energy == 0:
+            if ant.energy <= 0:
                 self.ants.remove(ant)
+
+        # Update the clock
+        self.clock += delta_t

@@ -3,7 +3,7 @@
 
 from faux_formicidae.simulation import Simulation
 from faux_formicidae.world import AntWorld
-from faux_formicidae.ant_colony import AntColony
+from faux_formicidae.ant_colony import AntColony, ColonyParameters
 from faux_formicidae.renderer import Renderer
 
 WIDTH_SCALE = 16
@@ -18,15 +18,14 @@ Y_Start = 180
 
 def visualizeColony():
     world = AntWorld(WIDTH_SCALE, HEIGHT_SCALE, RESOLUTION)
-    colony = AntColony(WIDTH_SCALE / 2, HEIGHT_SCALE / 2)
+    colony = AntColony(WIDTH_SCALE / 2, HEIGHT_SCALE / 2, ColonyParameters(1, 1, 1))
 
     sim = Simulation(world)
     sim.addAntColony(colony)
-    renderer = Renderer(sim, (X_Start, Y_Start))
+    renderer = Renderer(sim)
 
     dt = 0.05
     while renderer.running():
-        colony.runOnce()
         sim.runOnce(dt)
         renderer.render()
 

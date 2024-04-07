@@ -7,9 +7,9 @@ from faux_formicidae.world import WorldCell
 
 
 class Renderer(object):
-    def __init__(self, sim: Simulation, nestLoc):
+    def __init__(self, sim: Simulation):
         self.sim = sim
-        self.nestLoc = nestLoc
+        self.nestLoc = sim.antColony.position()
 
         self.width = self.sim.getWorld().widthCells
         self.height = self.sim.getWorld().heightCells

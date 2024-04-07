@@ -24,15 +24,21 @@ class Pheromones(IntEnum):
 
 
 NUM_PHEROMONES = Pheromones.__len__()
+WIDTH_SCALE = 16
+HEIGHT_SCALE = 9
+RESOLUTION = 40
 
 
 class AntWorld(object):
-    def __init__(self, width_cm: int, height_cm: int, resolution: int):
+    def __init__(self, width_cm: int = WIDTH_SCALE, height_cm: int = HEIGHT_SCALE, resolution: int = RESOLUTION):
         """
         :param width_cm:  World width in centimeters
         :param height_cm:  World height in centimeters
         :param resolution: World resolution (cells per centimeter)
         """
+
+        self.width = width_cm
+        self.height = height_cm
 
         self.widthCells = width_cm * resolution
         self.heightCells = height_cm * resolution
