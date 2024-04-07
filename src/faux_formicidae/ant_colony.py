@@ -6,7 +6,7 @@ Contains the actual parameters that are managed by the genetic algorithm, since 
 
 from dataclasses import dataclass
 
-from ant import Ant
+from faux_formicidae.ant import Ant
 
 
 # TODO: Get these parameters into the ant colony from the genetic algorithm
@@ -14,8 +14,9 @@ from ant import Ant
 
 @dataclass
 class ColonyParameters(object):
-    speed: float
-    spawn_interval: float
+    speed: float  # Faster ants go faster
+    size: float  # Larger ants carry more
+    spawn_interval: float  # How often does the colony spawn new ants
 
 
 class AntColony(object):

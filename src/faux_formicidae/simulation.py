@@ -8,9 +8,9 @@ Contains a world and a list of ant colony classes, manages the updates of each
 
 import typing
 
-from world import AntWorld
-from ant_colony import AntColony
-from ant import Ant
+from faux_formicidae.world import AntWorld
+from faux_formicidae.ant_colony import AntColony
+from faux_formicidae.ant import Ant
 
 
 class Simulation(object):

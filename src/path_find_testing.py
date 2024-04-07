@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-import time
-
-from simulation import Simulation
-from world import AntWorld
-from ant import Ant, AntMode
-from renderer import Renderer
+from faux_formicidae.simulation import Simulation
+from faux_formicidae.world import AntWorld
+from faux_formicidae.ant import Ant
+from faux_formicidae.renderer import Renderer
 
 WIDTH_SCALE = 16
 HEIGHT_SCALE = 9
@@ -22,7 +20,7 @@ def pathFindTest():
     sim = Simulation(world)
     renderer = Renderer(sim, (X_Start, Y_Start))
 
-    ant_1 = Ant()
+    ant_1 = Ant(None)
     ant_1.exploreDirection = 0.5
 
     sim.addAnt(ant_1, X_Start, Y_Start)

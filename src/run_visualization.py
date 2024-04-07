@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 
-from simulation import Simulation
-from world import AntWorld
-from ant_colony import AntColony
-from renderer import Renderer
+from faux_formicidae.simulation import Simulation
+from faux_formicidae.world import AntWorld
+from faux_formicidae.ant_colony import AntColony
+from faux_formicidae.renderer import Renderer
 
 WIDTH_SCALE = 16
 HEIGHT_SCALE = 9

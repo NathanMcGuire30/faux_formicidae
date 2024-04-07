@@ -10,7 +10,7 @@ import numpy as np
 
 from enum import Enum
 
-from world import AntWorld, Pheromones, WorldCell
+from faux_formicidae.world import AntWorld, Pheromones, WorldCell
 
 
 class AntMode(Enum):
@@ -186,7 +186,7 @@ class Ant(object):
             # if still have hope just keep going
             elif 0 < self.hope < 100:
                 obstacle_type = self.move(self.exploreDirection, self.antSpeed * delta_t)
-                print("Hopefull")
+                # print("Hopefull")
             else:
                 # can't find phero and no hope left
                 self.hope = -1
@@ -206,7 +206,8 @@ class Ant(object):
             if self.distanceToHome() < DROPOFF_DISTANCE:
                 self.mode = AntMode.EXPLORE
                 self.exploreDirection += math.pi
-                self.giveFood(self.energy)
+                if self.giveFood is not None:
+                    self.giveFood(self.energy)  # TODO: Giving its whole energy value kills the ant  We need to seperate out carried food from ant energy
             elif direction is not None:
                 # direction = self.getDirectionToNest()
                 self.move(direction, self.antSpeed * delta_t)

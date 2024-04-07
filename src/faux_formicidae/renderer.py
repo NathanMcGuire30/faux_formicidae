@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import pygame
 
-from simulation import Simulation
-from world import WorldCell
+from faux_formicidae.simulation import Simulation
+from faux_formicidae.world import WorldCell
 
 
 class Renderer(object):
