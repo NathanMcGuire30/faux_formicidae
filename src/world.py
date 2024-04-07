@@ -53,7 +53,6 @@ class AntWorld(object):
         self.world[590:640, 330:380, 0] = WorldCell.FOOD
 
         self.timeSince = 0
-        self.food = 0
 
     def getWidth(self):
         return self.widthCells
@@ -140,11 +139,9 @@ class AntWorld(object):
         self.timeSince += delta_t
         for pheromone in Pheromones:
             np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
-            if self.timeSince > 10:
-                self.world[:, :, int(pheromone)] = cv2.blur(self.world[:, :, int(pheromone)], (3, 3))
-                self.timeSince = 0
-                print("Blur")
 
-    def foodRecieved(self):
-        self.food += 1
-        print("Delivered",self.food)
+            # I don't think the blur stuff helps right, now but we can put it back if needed
+            # if self.timeSince > 10:
+            #     self.world[:, :, int(pheromone)] = cv2.blur(self.world[:, :, int(pheromone)], (3, 3))
+            #     self.timeSince = 0
+            #     print("Blur")

@@ -24,6 +24,16 @@ class AntColony(object):
         self.xPosition = x
         self.yPosition = y
 
+        self.energy = 100
+
+    def position(self):
+        return [self.xPosition, self.yPosition]
+
+    def giveFood(self, amount):
+        print("Got food")
+
+        self.energy += amount
+
     def setCallback(self, callback_fn):
         self.addAnt = callback_fn
 
@@ -34,9 +44,16 @@ class AntColony(object):
 
         # TODO: Set ant parameters
 
-        self.addAnt(Ant(), self.xPosition, self.yPosition)
+        ant = Ant(self.giveFood)
+        ant.setHomePosition(self.xPosition, self.yPosition)
+        self.addAnt(ant, self.xPosition, self.yPosition)
+
+        # TODO: scale
+        self.energy -= 1
 
     def runOnce(self):
         # TODO: Control how often ants spawn
 
-        self.makeAnt()
+        # TODO: energy is parameter
+        if self.energy > 5:
+            self.makeAnt()

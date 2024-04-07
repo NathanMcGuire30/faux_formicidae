@@ -33,12 +33,18 @@ def angle_diff_radians(a, b):
 
 
 class Ant(object):
-    def __init__(self, world: AntWorld = None, x=0, y=0, speed=1):
+    def __init__(self, give_food, world: AntWorld = None, x=0, y=0, speed=1):
         self.xPosition = x
         self.yPosition = y
         self.world = world
+        self.giveFood = give_food
         self.homePosition = (x, y)
 
+        # Energy is how much we have left, stamina is the max
+        self.energy = 1000.0
+        self.stamina = 100.0
+
+        # How fast we go
         self.antSpeed = speed  # cm/s
 
         # Mode tracking variables
@@ -90,6 +96,11 @@ class Ant(object):
         else:
             self.exploreDirection += math.pi + np.random.uniform(-1, 1)
 
+        # TODO: Scale by speed
+        self.energy -= 1
+        if self.energy < self.stamina * (1 / 8):
+            self.mode = AntMode.GO_HOME
+
         return obstacle_type
 
     def getDirectionToNest(self):
@@ -128,7 +139,6 @@ class Ant(object):
 
             i = np.argmax(weights)
             direction = theta[i]
-
             self.currentTrail = pheromone
             return direction
         else:
@@ -196,7 +206,7 @@ class Ant(object):
             if self.distanceToHome() < DROPOFF_DISTANCE:
                 self.mode = AntMode.EXPLORE
                 self.exploreDirection += math.pi
-                self.world.foodRecieved()
+                self.giveFood(self.energy)
             elif direction is not None:
                 # direction = self.getDirectionToNest()
                 self.move(direction, self.antSpeed * delta_t)
