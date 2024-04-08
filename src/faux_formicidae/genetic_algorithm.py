@@ -2,6 +2,8 @@
 Class to actually run the genetic algorithm
 """
 
+import os
+import yaml
 import numpy
 import heapq
 import random
@@ -19,11 +21,15 @@ from faux_formicidae.src.faux_formicidae.ant_colony import AntColony, ColonyPara
 MINIMUM = ColonyParameters(0, 0.1, 0)
 MAXIMUM = ColonyParameters(1, 1, 10)
 
+PATH = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..", ".."))
+
 
 class GeneticAlgorithm(object):
     def __init__(self, enable_renderer=False, batch_size=20):
         self.enableRenderer = enable_renderer
         self.batchSize = batch_size
+
+        self.defaultSaveFile = os.path.join(PATH, "data", "best_ants.yaml")
 
         self.simResults = []
         self.colonyParameters: List[ColonyParameters] = []
@@ -72,6 +78,7 @@ class GeneticAlgorithm(object):
         num_to_crossover = num_to_make - num_to_mutate
 
         # Make some mutations
+        # TODO: Enforce limits on new parameters
         for i in range(num_to_mutate):
             base = random.choice(kept_sim_results)
             params = base.getAsNumpy()
@@ -79,6 +86,7 @@ class GeneticAlgorithm(object):
             param_object = ColonyParameters(*params)
             self.colonyParameters.append(param_object)
 
+        # Make some crossovers
         for i in range(num_to_crossover):
             parents = random.sample(kept_sim_results, 2)
             parents = [i.getAsList() for i in parents]
@@ -121,19 +129,80 @@ class GeneticAlgorithm(object):
             renderer = Renderer(sim)
 
         population = 0
+        last_population = 0
+        next_population_check_time = 10
+        population_constant_for = 0
 
         dt = 0.05
-        for i in range(2500):
+
+        max_run_time = 10000
+        for i in range(max_run_time):
             sim.runOnce(dt)
 
             if self.enableRenderer:
                 renderer.render()
 
-            # TODO: Run until population is stabilized for some amount of time
-            population = int(len(sim.ants))
+            # TODO: Make sure we don't get weird false positives here
+            #   Vasilis: To prevent this I am requiring the sim run for at least 2500 ticks. Might be overkill but
+            #   it prevents a reward for just spawning all the ants at once with a lifespan of 11 ticks, which
+            #   it liked to do
+            if i > 2500:
+                if sim.clock >= next_population_check_time:
+                    population = int(len(sim.ants))
+
+                    # Calculate percent diff
+                    if population + last_population == 0:
+                        percent_diff = 0
+                    else:
+                        percent_diff = abs(population - last_population) / ((population + last_population) / 2)
+
+                    # If it hasn't changed, start counting
+                    if abs(percent_diff) < 0.05:
+                        population_constant_for += 1
+                    else:
+                        population_constant_for = 0
+
+                    # If it hasn't changed for 10 seconds, we're done
+                    if population_constant_for > 10:
+                        # print(f"Population leveled off after {sim.clock} seconds")
+                        # print(f'Population leveled off after {i} iterations')
+                        break
+
+                    last_population = population
+
+            if i == max_run_time - 1:
+                print("Hit runtime limit before population stabilized")
 
         if self.enableRenderer:
             renderer.quit()
 
         return population, index, colony_params
         # heapq.heappush(self.simResults, (population, index, colony_params))  # Use index to break ties
+
+    def saveColonyParameters(self, path=None):
+        if path is None:
+            path = self.defaultSaveFile
+
+        # TODO: Add hyperparameters
+        data_dict = {"ants": [i.floatDict() for i in self.colonyParameters],
+                     }
+
+        file = open(path, 'w')
+        yaml.dump(data_dict, file)
+        file.close()
+
+    def loadColonyParameters(self, path=None):
+        if path is None:
+            path = self.defaultSaveFile
+
+        file = open(path)
+        data = yaml.safe_load(file)
+        file.close()
+
+        # Read in ant data
+        ants = data["ants"]
+        self.colonyParameters = []
+        for ant in ants:
+            parameter_object = ColonyParameters(**ant)
+            self.colonyParameters.append(parameter_object)
+        self.batchSize = len(self.colonyParameters)

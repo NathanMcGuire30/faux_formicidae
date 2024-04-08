@@ -9,20 +9,21 @@ from run_visualization import visualizeColony
 
 
 def run():
+    # Runs and saves one iteration
     g = GeneticAlgorithm()
+
+    # g.loadColonyParameters()
+    # Added this to retrain:
     g.generateRandomColonies()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
-    g.runBatch()
-    g.generateColoniesFromSimResults()
+    for i in range(4):
+        g.runBatch()
+        g.generateColoniesFromSimResults()
+
+    # So we can see it work based on the best results from the last run:
     g.enableRenderer = True
     print(g.simResults)
     g.runSimulationOnce(0)
-
+    g.saveColonyParameters()
 
 
 if __name__ == '__main__':

@@ -26,6 +26,16 @@ class ColonyParameters(object):
     def getAsNumpy(self):
         return numpy.asarray(self.getAsList())
 
+    def floatDict(self):
+        """
+        YAML has issues if the values are numpy data types
+        """
+
+        data_dict = self.__dict__
+        for key in data_dict:
+            data_dict[key] = float(data_dict[key])
+        return data_dict
+
 
 class AntColony(object):
     def __init__(self, x, y, params: ColonyParameters):
@@ -48,7 +58,7 @@ class AntColony(object):
         # print("Colony food")
 
         # If an ant tries to take food, don't let it take more than there is
-        if amount < 0:
+        if amount <= 0:
             self.energy -= min(-1*amount, self.energy)
             # The ant needs to know how much food it is taking from the nest
             return min(-1*amount, self.energy)
