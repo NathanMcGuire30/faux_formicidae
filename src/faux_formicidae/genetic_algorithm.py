@@ -5,14 +5,15 @@ Class to actually run the genetic algorithm
 import numpy
 import heapq
 import random
+import multiprocessing
 
 from tqdm import tqdm
 from typing import List
 
-from faux_formicidae.world import AntWorld
-from faux_formicidae.simulation import Simulation
-from faux_formicidae.renderer import Renderer
-from faux_formicidae.ant_colony import AntColony, ColonyParameters
+from faux_formicidae.src.faux_formicidae.world import AntWorld
+from faux_formicidae.src.faux_formicidae.simulation import Simulation
+from faux_formicidae.src.faux_formicidae.renderer import Renderer
+from faux_formicidae.src.faux_formicidae.ant_colony import AntColony, ColonyParameters
 
 # set these to control the range of ant colonies that can be generated
 MINIMUM = ColonyParameters(0, 0.1, 0)
@@ -91,8 +92,15 @@ class GeneticAlgorithm(object):
         self.simResults = []
 
         # TODO: Can someone sort out multiprocessing (or some other library) so we can parallelize this?
-        for i in tqdm(range(self.batchSize)):
-            self.runSimulationOnce(i)
+        # Old code:
+
+        # for i in tqdm(range(self.batchSize)):
+        #     self.runSimulationOnce(i)
+        #
+        pool = multiprocessing.Pool()
+
+        for i in tqdm(pool.imap_unordered(self.runSimulationOnce, range(self.batchSize))):
+            heapq.heappush(self.simResults, i)
 
         # Sort list
         self.simResults = [heapq.heappop(self.simResults) for i in range(len(self.simResults))]
@@ -115,7 +123,7 @@ class GeneticAlgorithm(object):
         population = 0
 
         dt = 0.05
-        for i in range(100):
+        for i in range(2500):
             sim.runOnce(dt)
 
             if self.enableRenderer:
@@ -127,4 +135,5 @@ class GeneticAlgorithm(object):
         if self.enableRenderer:
             renderer.quit()
 
-        heapq.heappush(self.simResults, (population, index, colony_params))  # Use index to break ties
+        return population, index, colony_params
+        # heapq.heappush(self.simResults, (population, index, colony_params))  # Use index to break ties

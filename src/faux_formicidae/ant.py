@@ -10,7 +10,7 @@ import numpy as np
 
 from enum import Enum
 
-from faux_formicidae.world import AntWorld, Pheromones, WorldCell
+from faux_formicidae.src.faux_formicidae.world import AntWorld, Pheromones, WorldCell
 
 
 class AntMode(Enum):
@@ -34,6 +34,8 @@ def angle_diff_radians(a, b):
 
 class Ant(object):
     def __init__(self, give_food, world: AntWorld = None, x=0, y=0, speed=1, size=1):
+        # speed = 1
+        # size = 1
         self.xPosition = x
         self.yPosition = y
         self.world = world
@@ -41,11 +43,17 @@ class Ant(object):
         self.homePosition = (x, y)
 
         # Energy is how much we have left, stamina is the max
-        self.energy = 100.0
-        self.stamina = 100.0
+        # In order to make size matter (and not make the smallest size optimal),
+        # It directly impacts how much food an ant cant hold
+        # TODO: Probably would be a good idea to create constants for these multipliers
+        self.energy = 1000.0 * size
+        self.stamina = 1000.0 * size
+        self.food_carried = 0
+        self.carrying_capacity = 10*self.stamina
 
         # How fast we go
         self.antSpeed = speed  # cm/s
+        self.antSize = size
 
         # Mode tracking variables
         self.mode = AntMode.EXPLORE
@@ -97,7 +105,7 @@ class Ant(object):
             self.exploreDirection += math.pi + np.random.uniform(-1, 1)
 
         # TODO: Scale by speed
-        self.energy -= 1
+        self.energy -= (1 + self.antSpeed**2/1000 * self.antSize)
         if self.energy < self.stamina * (1 / 8):
             self.mode = AntMode.GO_HOME
 
@@ -174,6 +182,15 @@ class Ant(object):
         # Finding food, remember means we are placing down home pheromones
         if self.mode == AntMode.EXPLORE:
             direction = self.getDirectionAlongPheromone(visible_area, Pheromones.FOOD)
+            # TODO: This can be abstracted for the returning / exploring cases
+            direction_to_home = self.getDirectionToNest()
+            if not(direction is None or direction_to_home is None):
+                adjusted_direction = direction % (2 * math.pi)
+                adjusted_direction_to_food = direction_to_home % (2 * math.pi)
+                difference = abs(adjusted_direction - adjusted_direction_to_food)
+                is_within_range = difference <= math.pi / 4
+                if is_within_range:
+                    direction = None
             food_cells = self.worldObjectVisible(visible_area, WorldCell.FOOD)
             can_see_food = food_cells is not None and len(food_cells) > 0
 
@@ -193,21 +210,44 @@ class Ant(object):
                 obstacle_type = self.randomExplore(delta_t)
 
             # If we found food we start going home
+            # TODO: add functionality that removes food from a food source (if we get there)
+            # TODO: fix the issue where the ant gets stuck once the home trail runs out (the fix seems to work but it can be improved)
             if can_see_food or obstacle_type == int(WorldCell.FOOD):
                 self.mode = AntMode.GO_HOME
                 self.activePheromone = Pheromones.FOOD
                 self.exploreDirection += math.pi
+                self.energy = self.stamina
+                # I chose 10*stamina because that allows us to put more reward to carrying food, so we should see populations
+                # lean towards sending ants to the end
+                self.food_carried = self.carrying_capacity
             else:
                 self.activePheromone = Pheromones.HOME
         elif self.mode == AntMode.GO_HOME:
             direction = self.getDirectionAlongPheromone(visible_area, Pheromones.HOME)
+
+            # This code fixes ants getting stuck if the trail disappears
+            direction_to_home = self.getDirectionToNest()
+            if not(direction is None or direction_to_home is None):
+                adjusted_direction = direction % (2 * math.pi)
+                adjusted_direction_to_food = direction_to_home % (2 * math.pi)
+                difference = abs(adjusted_direction - adjusted_direction_to_food)
+                is_within_range = difference <= math.pi / 4
+                if not is_within_range:
+                    direction = self.getDirectionToNest()
             # direction = self.getDirectionToNest()
 
             if self.distanceToHome() < DROPOFF_DISTANCE:
                 self.mode = AntMode.EXPLORE
                 self.exploreDirection += math.pi
                 if self.giveFood is not None:
-                    self.giveFood(self.energy)  # TODO: Giving its whole energy value kills the ant  We need to seperate out carried food from ant energy
+                    self.giveFood(self.food_carried)
+                    self.food_carried = 0
+                    # In order to take food from the nest, we "fill" the remaining energy.
+                    # Updated the giveFood method to return min(colony energy, amount) so the colony energy >= 0
+                    self.energy = self.giveFood(-1 * (self.stamina - self.energy))
+                    # TODO: Test the following:
+                    # Giving its whole energy value kills the ant  We need to separate out carried food from ant energy (should work now)
+                    # take food from nest (done, needs testing)
             elif direction is not None:
                 # direction = self.getDirectionToNest()
                 self.move(direction, self.antSpeed * delta_t)

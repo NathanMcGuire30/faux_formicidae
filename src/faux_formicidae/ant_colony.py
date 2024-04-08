@@ -8,7 +8,7 @@ import numpy
 
 from dataclasses import dataclass
 
-from faux_formicidae.ant import Ant
+from faux_formicidae.src.faux_formicidae.ant import Ant
 
 
 # TODO: Get these parameters into the ant colony from the genetic algorithm
@@ -35,7 +35,7 @@ class AntColony(object):
 
         self.colonyParameters = params
 
-        self.energy = 100
+        self.energy = 100000
         self.nextSpawnTime = 0
 
     def setParams(self, params: ColonyParameters):
@@ -47,7 +47,14 @@ class AntColony(object):
     def giveFood(self, amount):
         # print("Colony food")
 
+        # If an ant tries to take food, don't let it take more than there is
+        if amount < 0:
+            self.energy -= min(-1*amount, self.energy)
+            # The ant needs to know how much food it is taking from the nest
+            return min(-1*amount, self.energy)
+
         self.energy += amount
+
 
     def setCallback(self, callback_fn):
         self.addAnt = callback_fn
@@ -61,10 +68,11 @@ class AntColony(object):
 
         ant = Ant(self.giveFood, speed=self.colonyParameters.speed, size=self.colonyParameters.size)
         ant.setHomePosition(self.xPosition, self.yPosition)
+        ant.energy = min(ant.stamina, self.energy)
         self.addAnt(ant, self.xPosition, self.yPosition)
 
-        # TODO: scale
-        self.energy -= 1
+        # TODO: scale (this should work now - since we spawn an ant with x stamina we are effectively feeding it that much on spawn)
+        self.energy -= min(ant.stamina, self.energy)
 
     def runOnce(self, dt, clock_time):
         # TODO: Control how often ants spawn
