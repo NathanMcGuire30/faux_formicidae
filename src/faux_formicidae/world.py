@@ -14,7 +14,7 @@ import cv2
 class WorldCell(IntEnum):
     EMPTY = 0
     WALL = 1
-    FOOD = 2
+    FOOD = 128
 
 
 # Pheromone options
@@ -53,10 +53,10 @@ class AntWorld(object):
         # Hard-code a few obstacles for now
         # 640, 380 for now 
         self.world[400:500, 100:150, 0] = WorldCell.WALL
-        # self.world[100:300, 200:300, 0] = WALL
-        # self.world[100:300, 0:100, 0] = WALL
-        self.world[0:50, 0:50, 0] = WorldCell.FOOD
-        self.world[590:640, 330:380, 0] = WorldCell.FOOD
+        self.world[100:300, 200:300, 0] = WorldCell.WALL
+        self.world[100:300, 0:100, 0] = WorldCell.WALL
+        # self.world[0:50, 0:50, 0] = WorldCell.FOOD
+        # self.world[590:640, 330:380, 0] = WorldCell.FOOD
 
         self.timeSince = 0
 
@@ -122,10 +122,10 @@ class AntWorld(object):
         start_y = y - radius
         end_y = y + radius
 
-        [start_i, start_j] = self.worldSpaceToPixelSpace(start_x, start_y)
-        [end_i, end_j] = self.worldSpaceToPixelSpace(end_x, end_y)
+        start_i, start_j = self.worldSpaceToPixelSpace(start_x, start_y)
+        end_i, end_j = self.worldSpaceToPixelSpace(end_x, end_y)
 
-        return self.getLayerSection(start_i, end_i, start_j, end_j)
+        return start_i, end_i, start_j, end_j#self.getLayerSection(start_i, end_i, start_j, end_j)
 
     def getLayerSection(self, start_i, end_i, start_j, end_j):
         return self.world[start_i:end_i, start_j:end_j, :]
@@ -145,7 +145,17 @@ class AntWorld(object):
         self.timeSince += delta_t
         for pheromone in Pheromones:
             np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
-
+        if self.timeSince > 40:
+            rand_pnt_x = np.random.uniform(WIDTH_SCALE)
+            rand_pnt_y = np.random.uniform(HEIGHT_SCALE)
+            s_i, e_i, s_j, e_j = self.sampleArea(rand_pnt_x, rand_pnt_y, 0.2)
+            # print("Point", rand_pnt_x, rand_pnt_y)
+            # print("Area", s_i, e_i, s_j, e_j)
+            if self.world[s_i: e_i, s_j: e_j, 0].sum() == WorldCell.EMPTY:
+                self.world[s_i: e_i, s_j: e_j, 0] = WorldCell.FOOD
+                # print("Success")
+            # print("Fail")
+            self.timeSince = 0
             # I don't think the blur stuff helps right, now but we can put it back if needed
             # if self.timeSince > 10:
             #     self.world[:, :, int(pheromone)] = cv2.blur(self.world[:, :, int(pheromone)], (3, 3))

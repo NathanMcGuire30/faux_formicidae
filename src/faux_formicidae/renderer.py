@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import pygame
 
-from faux_formicidae.src.faux_formicidae.simulation import Simulation
-from faux_formicidae.src.faux_formicidae.world import WorldCell
+from faux_formicidae.simulation import Simulation
+from faux_formicidae.world import WorldCell
 
 
 class Renderer(object):
@@ -81,4 +81,4 @@ class Renderer(object):
             pygame.draw.circle(self.screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 2)
 
     def renderNest(self):
-        pygame.draw.circle(self.screen, pygame.Color('orange'), self.nestLoc, 2)
+        pygame.draw.circle(self.screen, pygame.Color('orange'), (self.nestLoc[0] * 40, self.nestLoc[1]*40), 2)

@@ -12,10 +12,10 @@ import multiprocessing
 from tqdm import tqdm
 from typing import List
 
-from faux_formicidae.src.faux_formicidae.world import AntWorld
-from faux_formicidae.src.faux_formicidae.simulation import Simulation
-from faux_formicidae.src.faux_formicidae.renderer import Renderer
-from faux_formicidae.src.faux_formicidae.ant_colony import AntColony, ColonyParameters
+from faux_formicidae.world import AntWorld
+from faux_formicidae.simulation import Simulation
+from faux_formicidae.renderer import Renderer
+from faux_formicidae.ant_colony import AntColony, ColonyParameters
 
 # set these to control the range of ant colonies that can be generated
 MINIMUM = ColonyParameters(0, 0.1, 0)

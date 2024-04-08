@@ -8,7 +8,7 @@ import numpy
 
 from dataclasses import dataclass
 
-from faux_formicidae.src.faux_formicidae.ant import Ant
+from faux_formicidae.ant import Ant
 
 
 # TODO: Get these parameters into the ant colony from the genetic algorithm

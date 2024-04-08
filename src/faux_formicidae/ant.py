@@ -10,7 +10,7 @@ import numpy as np
 
 from enum import Enum
 
-from faux_formicidae.src.faux_formicidae.world import AntWorld, Pheromones, WorldCell
+from faux_formicidae.world import AntWorld, Pheromones, WorldCell
 
 
 class AntMode(Enum):
@@ -176,8 +176,9 @@ class Ant(object):
         If a sample is found, follow that sample
         """
         DROPOFF_DISTANCE = .5
-        visible_area = self.world.sampleArea(self.xPosition, self.yPosition, 0.15)
-        world_layer = visible_area[:, :, 0]
+        s_i, e_i, s_j, e_j = self.world.sampleArea(self.xPosition, self.yPosition, 0.15)
+        visible_area = self.world.getLayerSection(s_i, e_i, s_j, e_j)
+        # world_layer = visible_area[:, :, 0]
 
         # Finding food, remember means we are placing down home pheromones
         if self.mode == AntMode.EXPLORE:
@@ -212,11 +213,14 @@ class Ant(object):
             # If we found food we start going home
             # TODO: add functionality that removes food from a food source (if we get there)
             # TODO: fix the issue where the ant gets stuck once the home trail runs out (the fix seems to work but it can be improved)
-            if can_see_food or obstacle_type == int(WorldCell.FOOD):
+            if can_see_food:# or obstacle_type == int(WorldCell.FOOD):
                 self.mode = AntMode.GO_HOME
                 self.activePheromone = Pheromones.FOOD
                 self.exploreDirection += math.pi
                 self.energy = self.stamina
+                self.world.world[s_i:e_i, s_j: e_j,0] = np.vectorize(lambda x: WorldCell.EMPTY if x == WorldCell.FOOD else x)(self.world.world[s_i:e_i, s_j: e_j, 0])
+                
+
                 # I chose 10*stamina because that allows us to put more reward to carrying food, so we should see populations
                 # lean towards sending ants to the end
                 self.food_carried = self.carrying_capacity
@@ -231,7 +235,7 @@ class Ant(object):
                 adjusted_direction = direction % (2 * math.pi)
                 adjusted_direction_to_food = direction_to_home % (2 * math.pi)
                 difference = abs(adjusted_direction - adjusted_direction_to_food)
-                is_within_range = difference <= math.pi / 4
+                is_within_range = difference <= math.pi / 1.5
                 if not is_within_range:
                     direction = self.getDirectionToNest()
             # direction = self.getDirectionToNest()
