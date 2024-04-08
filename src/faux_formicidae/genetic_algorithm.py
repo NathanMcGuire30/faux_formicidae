@@ -146,6 +146,9 @@ class GeneticAlgorithm(object):
             #   Vasilis: To prevent this I am requiring the sim run for at least 2500 ticks. Might be overkill but
             #   it prevents a reward for just spawning all the ants at once with a lifespan of 11 ticks, which
             #   it liked to do
+            # TODO: 
+            # Randomize the number of ticks, to some range around 2500
+            # it it does not bias towards one epoch length
             if i > 2500:
                 if sim.clock >= next_population_check_time:
                     population = int(len(sim.ants))
@@ -157,6 +160,7 @@ class GeneticAlgorithm(object):
                         percent_diff = abs(population - last_population) / ((population + last_population) / 2)
 
                     # If it hasn't changed, start counting
+                    #TODO: potentially lower this value so the colony is required to keep a steadier population
                     if abs(percent_diff) < 0.05:
                         population_constant_for += 1
                     else:

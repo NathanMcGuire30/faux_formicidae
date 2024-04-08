@@ -145,7 +145,8 @@ class AntWorld(object):
         self.timeSince += delta_t
         for pheromone in Pheromones:
             np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
-        if self.timeSince > 40:
+        # Note: we can stop food spawning and see interesting results, the colony spawns ants expecting food to be found
+        if self.timeSince > 40:# and False:
             rand_pnt_x = np.random.uniform(WIDTH_SCALE)
             rand_pnt_y = np.random.uniform(HEIGHT_SCALE)
             s_i, e_i, s_j, e_j = self.sampleArea(rand_pnt_x, rand_pnt_y, 0.2)
