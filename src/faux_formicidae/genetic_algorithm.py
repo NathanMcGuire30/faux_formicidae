@@ -3,6 +3,8 @@ Class to actually run the genetic algorithm
 """
 
 import os
+
+import numpy as np
 import yaml
 import numpy
 import heapq
@@ -114,7 +116,7 @@ class GeneticAlgorithm(object):
         self.simResults = [heapq.heappop(self.simResults) for i in range(len(self.simResults))]
         self.simResults.reverse()
 
-    def runSimulationOnce(self, index):
+    def runSimulationOnce(self, index, visualizing=False):
         # We do the same thing as the visualization script, just without the renderer
 
         colony_params = self.colonyParameters[index]
@@ -125,9 +127,6 @@ class GeneticAlgorithm(object):
         colony = AntColony(world.width / 2, world.height / 2, colony_params)
         sim.addAntColony(colony)
 
-        if self.enableRenderer:
-            renderer = Renderer(sim)
-
         population = 0
         last_population = 0
         next_population_check_time = 10
@@ -135,7 +134,21 @@ class GeneticAlgorithm(object):
 
         dt = 0.05
 
+        if self.enableRenderer:
+            renderer = Renderer(sim)
+            if visualizing:
+                i = 0
+                while renderer.running():
+                    if i % 1000 == 0:
+                        print(len(sim.ants))
+                    i += 1
+                    sim.runOnce(dt)
+                    renderer.render()
+                renderer.quit()
+                return None
+
         max_run_time = 10000
+        min_iterations = np.random.uniform(2500, 5000)
         for i in range(max_run_time):
             sim.runOnce(dt)
 
@@ -149,7 +162,7 @@ class GeneticAlgorithm(object):
             # TODO: 
             # Randomize the number of ticks, to some range around 2500
             # it it does not bias towards one epoch length
-            if i > 2500:
+            if i > min_iterations:
                 if sim.clock >= next_population_check_time:
                     population = int(len(sim.ants))
 

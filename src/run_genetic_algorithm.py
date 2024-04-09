@@ -15,16 +15,16 @@ def run():
     g.loadColonyParameters()
     # Added this to retrain:
     # g.generateRandomColonies()
-    # for i in range(4):
+    # for i in range(10):
     #     print(i)
     #     g.runBatch()
     #     g.generateColoniesFromSimResults()
 
     # So we can see it work based on the best results from the last run:
     g.enableRenderer = True
-    print(g.simResults)
-    g.runSimulationOnce(0)
-    g.saveColonyParameters()
+    # print(g.simResults)
+    g.runSimulationOnce(0, True)
+    # g.saveColonyParameters()
 
 
 if __name__ == '__main__':
