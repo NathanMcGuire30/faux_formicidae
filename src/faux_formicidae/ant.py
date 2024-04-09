@@ -49,7 +49,7 @@ class Ant(object):
         self.energy = 1000.0 * size
         self.stamina = 1000.0 * size
         self.food_carried = 0
-        self.carrying_capacity = 10*self.stamina
+        self.carrying_capacity = 10 * self.stamina
 
         # How fast we go
         self.antSpeed = speed  # cm/s
@@ -68,6 +68,7 @@ class Ant(object):
         self.temperInc = 5
         self.hopeInc = 5
 
+        self.searchRadius = 0
         self.exploreDirection = random.random() * 2 * math.pi
 
     def setWorld(self, world):
@@ -105,7 +106,7 @@ class Ant(object):
             self.exploreDirection += math.pi + np.random.uniform(-1, 1)
 
         # TODO: Scale by speed
-        self.energy -= (1 + self.antSpeed**2/1000 * self.antSize)
+        self.energy -= (1 + self.antSpeed ** 2 / 1000 * self.antSize)
         if self.energy < self.stamina * (1 / 8):
             self.mode = AntMode.GO_HOME
 
@@ -116,12 +117,23 @@ class Ant(object):
         y_diff = self.yPosition - self.homePosition[1]
         angle = -1 * (math.pi - math.atan2(y_diff, x_diff))
 
-        return angle
+        # Completely stupid hacks to make them a little less dumb
+        s_i, e_i, s_j, e_j = self.world.sampleArea(self.xPosition, self.yPosition, max(self.searchRadius * 1.6, 0.05))
+        visible_area = self.world.getLayerSection(s_i, e_i, s_j, e_j)
+        return self.getDirectionAlongPheromone(visible_area, 0, target_direction=angle, cell_type=WorldCell.EMPTY)
 
-    def getDirectionAlongPheromone(self, fov: np.ndarray, pheromone):
+    def getDirectionAlongPheromone(self, fov: np.ndarray, pheromone, target_direction=None, cell_type=None):
+        if target_direction is None:
+            target_direction = self.exploreDirection
+
         use_gradient = pheromone != self.currentTrail
 
-        visible_area = fov[:, :, int(pheromone)].copy().T
+        if pheromone != 0:
+            visible_area = fov[:, :, int(pheromone)].copy().T
+        else:
+            visible_area = fov[:, :, int(pheromone)].copy().T
+            visible_area = visible_area == int(cell_type)
+
         non_zero_locations = np.nonzero(visible_area)
         non_zero_values = visible_area[non_zero_locations]
         non_zero_locations = np.asarray(non_zero_locations)
@@ -134,7 +146,7 @@ class Ant(object):
 
             v = (ant_location - non_zero_locations.T).T
             theta = np.arctan2(v[0, :], v[1, :]) - np.pi
-            diff = abs(angle_diff_radians(theta, self.exploreDirection - math.pi))
+            diff = abs(angle_diff_radians(theta, target_direction - math.pi))
 
             # Trying to detect bends in the trail
             # max_diff = np.max(diff)
@@ -180,12 +192,15 @@ class Ant(object):
         visible_area = self.world.getLayerSection(s_i, e_i, s_j, e_j)
         # world_layer = visible_area[:, :, 0]
 
+        # Used for some pathfinding
+        self.searchRadius = self.antSpeed * delta_t
+
         # Finding food, remember means we are placing down home pheromones
         if self.mode == AntMode.EXPLORE:
             direction = self.getDirectionAlongPheromone(visible_area, Pheromones.FOOD)
             # TODO: This can be abstracted for the returning / exploring cases
             direction_to_home = self.getDirectionToNest()
-            if not(direction is None or direction_to_home is None):
+            if not (direction is None or direction_to_home is None):
                 adjusted_direction = direction % (2 * math.pi)
                 adjusted_direction_to_food = direction_to_home % (2 * math.pi)
                 difference = abs(adjusted_direction - adjusted_direction_to_food)
@@ -213,13 +228,12 @@ class Ant(object):
             # If we found food we start going home
             # TODO: add functionality that removes food from a food source (if we get there)
             # TODO: fix the issue where the ant gets stuck once the home trail runs out (the fix seems to work but it can be improved)
-            if can_see_food:# or obstacle_type == int(WorldCell.FOOD):
+            if can_see_food:  # or obstacle_type == int(WorldCell.FOOD):
                 self.mode = AntMode.GO_HOME
                 self.activePheromone = Pheromones.FOOD
                 self.exploreDirection += math.pi
                 self.energy = self.stamina
-                self.world.world[s_i:e_i, s_j: e_j,0] = np.vectorize(lambda x: WorldCell.EMPTY if x == WorldCell.FOOD else x)(self.world.world[s_i:e_i, s_j: e_j, 0])
-                
+                self.world.world[s_i:e_i, s_j: e_j, 0] = np.vectorize(lambda x: WorldCell.EMPTY if x == WorldCell.FOOD else x)(self.world.world[s_i:e_i, s_j: e_j, 0])
 
                 # I chose 10*stamina because that allows us to put more reward to carrying food, so we should see populations
                 # lean towards sending ants to the end
@@ -231,14 +245,14 @@ class Ant(object):
 
             # This code fixes ants getting stuck if the trail disappears
             direction_to_home = self.getDirectionToNest()
-            if not(direction is None or direction_to_home is None):
+            if not (direction is None or direction_to_home is None):
                 adjusted_direction = direction % (2 * math.pi)
                 adjusted_direction_to_food = direction_to_home % (2 * math.pi)
                 difference = abs(adjusted_direction - adjusted_direction_to_food)
                 is_within_range = difference <= math.pi / 1.5
                 if not is_within_range:
                     direction = self.getDirectionToNest()
-            # direction = self.getDirectionToNest()
+            direction = self.getDirectionToNest()
 
             if self.distanceToHome() < DROPOFF_DISTANCE:
                 self.mode = AntMode.EXPLORE

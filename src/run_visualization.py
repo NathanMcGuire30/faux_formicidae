@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 from faux_formicidae.simulation import Simulation
 from faux_formicidae.world import AntWorld
 from faux_formicidae.ant_colony import AntColony, ColonyParameters

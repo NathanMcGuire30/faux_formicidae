@@ -59,12 +59,11 @@ class AntColony(object):
 
         # If an ant tries to take food, don't let it take more than there is
         if amount <= 0:
-            self.energy -= min(-1*amount, self.energy)
+            self.energy -= min(-1 * amount, self.energy)
             # The ant needs to know how much food it is taking from the nest
-            return min(-1*amount, self.energy)
+            return min(-1 * amount, self.energy)
 
         self.energy += amount
-
 
     def setCallback(self, callback_fn):
         self.addAnt = callback_fn

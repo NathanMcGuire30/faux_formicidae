@@ -3,13 +3,17 @@ import cv2
 import pygame
 
 from faux_formicidae.simulation import Simulation
-from faux_formicidae.world import WorldCell
+from faux_formicidae.world import WorldCell, Pheromones
 
 
 class Renderer(object):
     def __init__(self, sim: Simulation):
         self.sim = sim
-        self.nestLoc = sim.antColony.position()
+
+        if sim.antColony is not None:
+            self.nestLoc = sim.antColony.position()
+        else:
+            self.nestLoc = [0, 0]
 
         self.width = self.sim.getWorld().widthCells
         self.height = self.sim.getWorld().heightCells
@@ -38,8 +42,8 @@ class Renderer(object):
         a = time.time()
         self.renderWorld()
 
-        self.renderPheromoneFast(1, (0, 0, 255))
-        self.renderPheromoneFast(2, (0, 100, 0))
+        self.renderPheromoneFast(Pheromones.HOME, (0, 0, 255))
+        self.renderPheromoneFast(Pheromones.FOOD, (0, 100, 0))
 
         self.renderAnts()
 
@@ -81,4 +85,4 @@ class Renderer(object):
             pygame.draw.circle(self.screen, pygame.Color('brown'), ant.getPositionPixelSpace(), 2)
 
     def renderNest(self):
-        pygame.draw.circle(self.screen, pygame.Color('orange'), (self.nestLoc[0] * 40, self.nestLoc[1]*40), 2)
+        pygame.draw.circle(self.screen, pygame.Color('orange'), (self.nestLoc[0] * 40, self.nestLoc[1] * 40), 2)

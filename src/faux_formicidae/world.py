@@ -125,7 +125,7 @@ class AntWorld(object):
         start_i, start_j = self.worldSpaceToPixelSpace(start_x, start_y)
         end_i, end_j = self.worldSpaceToPixelSpace(end_x, end_y)
 
-        return start_i, end_i, start_j, end_j#self.getLayerSection(start_i, end_i, start_j, end_j)
+        return start_i, end_i, start_j, end_j  # self.getLayerSection(start_i, end_i, start_j, end_j)
 
     def getLayerSection(self, start_i, end_i, start_j, end_j):
         return self.world[start_i:end_i, start_j:end_j, :]
@@ -146,7 +146,7 @@ class AntWorld(object):
         for pheromone in Pheromones:
             np.clip(self.world[:, :, int(pheromone)] - evaporate_step, 0.0, 1.0, self.world[:, :, int(pheromone)])
         # Note: we can stop food spawning and see interesting results, the colony spawns ants expecting food to be found
-        if self.timeSince > 40:# and False:
+        if self.timeSince > 40:  # and False:
             rand_pnt_x = np.random.uniform(WIDTH_SCALE)
             rand_pnt_y = np.random.uniform(HEIGHT_SCALE)
             s_i, e_i, s_j, e_j = self.sampleArea(rand_pnt_x, rand_pnt_y, 0.2)

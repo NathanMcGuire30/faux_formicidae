@@ -32,7 +32,7 @@ class Simulation(object):
             ant.setWorld(self.world)
             ant.setPosition(x, y)
         else:
-            pass
+            print(f"Can't add ant at {x}, {y}")
             # TODO: This really shouldn't happen, but we should probably do something here
 
     def getWorld(self):
@@ -52,7 +52,8 @@ class Simulation(object):
         self.world.runOnce(delta_t)
 
         # Update the colony
-        self.antColony.runOnce(delta_t, self.clock)
+        if self.antColony is not None:
+            self.antColony.runOnce(delta_t, self.clock)
 
         # Update the ants
         for ant in self.ants:
