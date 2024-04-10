@@ -28,7 +28,7 @@ def pathFindTest():
 
     ant_1 = Ant(giveFood)
     ant_1.energy = 100000
-    ant_1.antSpeed = 1
+    ant_1.antSpeed = 0.5
     ant_1.exploreDirection = 0.1
     ant_1.mode = AntMode.GO_HOME
     ant_1.setHomePosition(WIDTH_SCALE / 2.0, HEIGHT_SCALE / 2.0)

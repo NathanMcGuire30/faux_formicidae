@@ -120,7 +120,7 @@ class Ant(object):
 
         # Completely stupid hacks to make them a little less dumb
         scale_factor = 2.0  # np.random.uniform(1.1, 2)  # This is a weapons-grade hack, but it made stuff better at one point
-        s_i, e_i, s_j, e_j = self.world.sampleArea(self.xPosition, self.yPosition, max(self.searchRadius * scale_factor, 0.05))
+        s_i, e_i, s_j, e_j = self.world.sampleArea(self.xPosition, self.yPosition, max(self.searchRadius * scale_factor, 0.1))
         visible_area = self.world.getLayerSection(s_i, e_i, s_j, e_j)
         return self.getDirectionAlongPheromone(visible_area, 0, target_direction=angle, cell_type=WorldCell.EMPTY, erode=True)
 
@@ -136,7 +136,8 @@ class Ant(object):
             visible_area = fov[:, :, int(pheromone)].copy().T
             visible_area = visible_area == int(cell_type)
             if erode:
-                visible_area = scipy.ndimage.binary_erosion(visible_area, iterations=2)
+                element = scipy.ndimage.generate_binary_structure(2, 2)
+                visible_area = scipy.ndimage.binary_erosion(visible_area, structure=element, iterations=2)
 
         non_zero_locations = np.nonzero(visible_area)
         non_zero_values = visible_area[non_zero_locations]
