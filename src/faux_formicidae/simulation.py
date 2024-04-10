@@ -20,6 +20,7 @@ class Simulation(object):
 
         self.antColony = None
         self.ants: typing.List[Ant] = []
+        self.deadAnts = 0
 
     def addAntColony(self, colony: AntColony):
         self.antColony = colony
@@ -33,7 +34,6 @@ class Simulation(object):
             ant.setPosition(x, y)
         else:
             print(f"Can't add ant at {x}, {y}")
-            # TODO: This really shouldn't happen, but we should probably do something here
 
     def getWorld(self):
         return self.world
@@ -61,6 +61,9 @@ class Simulation(object):
 
             if ant.energy <= 0:
                 self.ants.remove(ant)
+                self.deadAnts += 1
+
+        # print(len(self.ants), self.deadAnts)
 
         # Update the clock
         self.clock += delta_t
