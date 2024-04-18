@@ -127,12 +127,14 @@ class GeneticAlgorithm(object):
         colony = AntColony(world.width / 2, world.height / 2, colony_params)
         sim.addAntColony(colony)
 
+        # I fixed the code bug in the steady-state checking and combined Vasilis' min length check together
+        dt = 0.05
+        min_iterations = np.random.uniform(2500, 5000)
+        next_population_check_time = min_iterations * dt
+
         population = 0
         last_population = 0
-        next_population_check_time = 10
         population_constant_for = 0
-
-        dt = 0.05
 
         if self.enableRenderer:
             renderer = Renderer(sim)
@@ -148,7 +150,6 @@ class GeneticAlgorithm(object):
                 return None
 
         max_run_time = 10000
-        min_iterations = np.random.uniform(2500, 5000)
         for i in range(max_run_time):
             sim.runOnce(dt)
 
@@ -162,30 +163,33 @@ class GeneticAlgorithm(object):
             # TODO: 
             # Randomize the number of ticks, to some range around 2500
             # it it does not bias towards one epoch length
-            if i > min_iterations:
-                if sim.clock >= next_population_check_time:
-                    population = int(len(sim.ants))
+            # print(sim.clock, next_population_check_time)
+            if sim.clock >= next_population_check_time:
+                population = int(len(sim.ants))
+                # print(population)
 
-                    # Calculate percent diff
-                    if population + last_population == 0:
-                        percent_diff = 0
-                    else:
-                        percent_diff = abs(population - last_population) / ((population + last_population) / 2)
+                # Calculate percent diff
+                if population + last_population == 0:
+                    percent_diff = 0
+                else:
+                    percent_diff = abs(population - last_population) / ((population + last_population) / 2)
 
-                    # If it hasn't changed, start counting
-                    #TODO: potentially lower this value so the colony is required to keep a steadier population
-                    if abs(percent_diff) < 0.05:
-                        population_constant_for += 1
-                    else:
-                        population_constant_for = 0
+                # If it hasn't changed, start counting
+                # TODO: potentially lower this value so the colony is required to keep a steadier population
+                if abs(percent_diff) < 0.05:
+                    population_constant_for += 1
+                else:
+                    population_constant_for = 0
 
-                    # If it hasn't changed for 10 seconds, we're done
-                    if population_constant_for > 10:
-                        # print(f"Population leveled off after {sim.clock} seconds")
-                        # print(f'Population leveled off after {i} iterations')
-                        break
+                # If it hasn't changed for 10 seconds, we're done
+                if population_constant_for > 10:
+                    # print(f"Population leveled off after {sim.clock} seconds")
+                    # print(f'Population leveled off after {i} iterations')
+                    break
 
-                    last_population = population
+                last_population = population
+
+                next_population_check_time = sim.clock + 1
 
             if i == max_run_time - 1:
                 print("Hit runtime limit before population stabilized")

@@ -21,9 +21,9 @@ def run():
     #     g.generateColoniesFromSimResults()
 
     # So we can see it work based on the best results from the last run:
-    g.enableRenderer = True
+    g.enableRenderer = False
     # print(g.simResults)
-    g.runSimulationOnce(0, True)
+    g.runSimulationOnce(0)
     # g.saveColonyParameters()
 
 
