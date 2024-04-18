@@ -3,6 +3,8 @@ Class to actually run the genetic algorithm
 """
 
 import os
+import time
+import curses
 
 import numpy as np
 import yaml
@@ -27,6 +29,8 @@ PATH = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..", "..")
 
 
 class GeneticAlgorithm(object):
+    progress = {}
+
     def __init__(self, enable_renderer=False, batch_size=20):
         self.enableRenderer = enable_renderer
         self.batchSize = batch_size
@@ -100,16 +104,11 @@ class GeneticAlgorithm(object):
 
     def runBatch(self):
         self.simResults = []
+        self.progress = {}
 
-        # TODO: Can someone sort out multiprocessing (or some other library) so we can parallelize this?
-        # Old code:
-
-        # for i in tqdm(range(self.batchSize)):
-        #     self.runSimulationOnce(i)
-        #
+        # Use multiprocessing to parallelize stuff
         pool = multiprocessing.Pool()
-
-        for i in tqdm(pool.imap_unordered(self.runSimulationOnce, range(self.batchSize))):
+        for i in pool.imap_unordered(self.runSimulationOnce, range(self.batchSize)):
             heapq.heappush(self.simResults, i)
 
         # Sort list
@@ -118,6 +117,8 @@ class GeneticAlgorithm(object):
 
     def runSimulationOnce(self, index, visualizing=False):
         # We do the same thing as the visualization script, just without the renderer
+
+        print(f"  Starting colony {index}")
 
         colony_params = self.colonyParameters[index]
 
@@ -131,6 +132,7 @@ class GeneticAlgorithm(object):
         dt = 0.05
         min_iterations = np.random.uniform(2500, 5000)
         next_population_check_time = min_iterations * dt
+        next_print_time = 0
 
         population = 0
         last_population = 0
@@ -153,14 +155,18 @@ class GeneticAlgorithm(object):
         for i in range(max_run_time):
             sim.runOnce(dt)
 
+            if time.time() > next_print_time:
+                # TODO: Figure out how to make a nice display output in a threadsafe way (I'm not sure its doable)
+                next_print_time = time.time() + 1
+
             if self.enableRenderer:
                 renderer.render()
 
-            # TODO: Make sure we don't get weird false positives here
+            # Make sure we don't get weird false positives here
             #   Vasilis: To prevent this I am requiring the sim run for at least 2500 ticks. Might be overkill but
             #   it prevents a reward for just spawning all the ants at once with a lifespan of 11 ticks, which
             #   it liked to do
-            # TODO: 
+
             # Randomize the number of ticks, to some range around 2500
             # it it does not bias towards one epoch length
             # print(sim.clock, next_population_check_time)
@@ -192,7 +198,7 @@ class GeneticAlgorithm(object):
                 next_population_check_time = sim.clock + 1
 
             if i == max_run_time - 1:
-                print("Hit runtime limit before population stabilized")
+                print(f"Index {index} hit runtime limit before population stabilized")
 
         if self.enableRenderer:
             renderer.quit()
@@ -200,8 +206,10 @@ class GeneticAlgorithm(object):
         return population, index, colony_params
         # heapq.heappush(self.simResults, (population, index, colony_params))  # Use index to break ties
 
-    def saveColonyParameters(self, path=None):
-        if path is None:
+    def saveColonyParameters(self, path=None, batch_id=None):
+        if batch_id is not None:
+            path = os.path.join(PATH, "data", f"batch_{batch_id}.yaml")
+        elif path is None:
             path = self.defaultSaveFile
 
         # TODO: Add hyperparameters
@@ -210,6 +218,27 @@ class GeneticAlgorithm(object):
 
         file = open(path, 'w')
         yaml.dump(data_dict, file)
+        file.close()
+
+    def saveColonyResults(self, batch_id):
+        path = os.path.join(PATH, "data", f"results_{batch_id}.yaml")
+
+        results = []
+
+        for result in self.simResults:
+            population, index, params = result
+            data_dict = {"population": population}
+            data_dict.update(params.floatDict())
+
+            while len(results) <= index:
+                results.append({})
+
+            results[index] = data_dict
+
+        full_data = {"ants": results}
+
+        file = open(path, 'w')
+        yaml.dump(full_data, file)
         file.close()
 
     def loadColonyParameters(self, path=None):
