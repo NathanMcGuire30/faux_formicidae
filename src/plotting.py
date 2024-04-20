@@ -101,7 +101,8 @@ def plotAllVariables(data):
 
     ax1.legend(lns, ["Population", "Size", "Spawn interval", "Speed"], loc=9)
 
-    plt.show()
+    # plt.show()
+    plt.savefig("all_data.png")
 
 
 def plotSingleVariable(data, field):
