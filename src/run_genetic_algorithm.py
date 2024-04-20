@@ -15,8 +15,8 @@ def run():
 
     g.loadColonyParameters()
     # Added this to retrain:
-    g.generateRandomColonies()
-    for i in range(10):
+    # g.generateRandomColonies()
+    for i in range(47, 100):
         print(f"\n\nRunning batch {i}")
         g.saveColonyParameters(batch_id=i)
         g.runBatch()
