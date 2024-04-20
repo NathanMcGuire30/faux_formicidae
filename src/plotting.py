@@ -25,7 +25,6 @@ def getDataFiles(keyword="results_"):
     files = os.listdir(DATA_DIR)
     files = [file for file in files if keyword in file]  # Python moment
     files.sort(key=natural_keys)
-    print(files)
     return files
 
 
