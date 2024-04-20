@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from faux_formicidae.simulation import Simulation
-from faux_formicidae.world import AntWorld
+from faux_formicidae.world import AntWorld, Pheromones
 from faux_formicidae.ant import Ant, AntMode
 from faux_formicidae.renderer import Renderer
 
@@ -31,6 +31,7 @@ def pathFindTest():
     ant_1.antSpeed = 0.5
     ant_1.exploreDirection = 0.1
     ant_1.mode = AntMode.GO_HOME
+    ant_1.activePheromone = Pheromones.FOOD
     ant_1.setHomePosition(WIDTH_SCALE / 2.0, HEIGHT_SCALE / 2.0)
 
     sim.addAnt(ant_1, 1, 1)

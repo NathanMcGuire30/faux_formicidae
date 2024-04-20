@@ -1,3 +1,4 @@
+import re
 import os
 import yaml
 import numpy
@@ -7,10 +8,24 @@ PATH = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", ".."))
 DATA_DIR = os.path.join(PATH, "data")
 
 
+def atof(text):
+    try:
+        retval = float(text)
+    except ValueError:
+        retval = text
+    return retval
+
+
+def natural_keys(text):
+    """From here https://stackoverflow.com/questions/5967500/how-to-correctly-sort-a-string-with-a-number-inside"""
+    return [atof(c) for c in re.split(r'[+-]?([0-9]+(?:[.][0-9]*)?|[.][0-9]+)', text)]
+
+
 def getDataFiles(keyword="results_"):
     files = os.listdir(DATA_DIR)
     files = [file for file in files if keyword in file]  # Python moment
-    files.sort()
+    files.sort(key=natural_keys)
+    print(files)
     return files
 
 
@@ -113,7 +128,7 @@ def plotSingleVariable(data, field):
 
 def main():
     data = loadResults()
-    # plotSingleVariable(data, "speed")
+    # plotSingleVariable(data, "spawn_interval")
     plotAllVariables(data)
 
 
