@@ -108,10 +108,12 @@ def plotAllVariables(data):
     d = singleVariableAxis(data["speed"], ax2)
     lns = a + b + c + d
 
-    plt.title("Ant evolution")
+    num_points = len(list(data.values())[0])
+
+    plt.title(f"Ant evolution over {num_points} batches")
     ax1.set_xlabel("Generations")
-    ax1.set_ylabel("Population")
-    ax2.set_ylabel("Parameter value")
+    ax1.set_ylabel("Average batch population")
+    ax2.set_ylabel("Average batch parameter value")
 
     ax1.legend(lns, ["Population", "Size", "Spawn interval", "Speed"], loc=9)
 
